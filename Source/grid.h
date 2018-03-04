@@ -3,11 +3,13 @@
 
 #include <QVector>
 
+#include <QDebug>
+
 class Grid
 {
 public:
 	Grid(int N);
-	~Grid();
+	virtual ~Grid();
 
 	virtual double get(int i) const = 0;
 	virtual void set(int i, double v) = 0;

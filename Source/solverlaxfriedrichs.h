@@ -1,39 +1,37 @@
 #ifndef SOLVERLAXFRIEDRICHS_H
 #define SOLVERLAXFRIEDRICHS_H
 
+#include "solver.h"
 #include "gridphysical.h"
 #include "gridvirtual.h"
 
-class SolverLaxFriedrichs
+#include <QDebug>
+
+class SolverLaxFriedrichs : public Solver
 {
 public:
-	SolverLaxFriedrichs();
+	SolverLaxFriedrichs(double l, double r);
 	~SolverLaxFriedrichs();
 
+	void initialCondition();
 	void solve();
 
-//private:
-	void initialCondition();
+private:
 	double f(int i) const;
-	double fDer(int i) const;
-
 	void evaluateFlux();
 	void computeNext();
+	double computeCFL() const;
 
-	void saveCurrentGrid() const;
 private:
 	void swapGrid();
+	double getX(int i) const;
 
 private:
-	double m_xmax;
-	double m_xmin;
 	double m_dx;
-	int m_N;
-
-	double m_tmax;
-	double m_t;
 	double m_dt;
 
+	double m_uL;
+	double m_uR;
 
 	GridPhysical *m_Current;
 	GridPhysical *m_Next;

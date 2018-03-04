@@ -5,10 +5,12 @@ SOURCES += \
     grid.cpp \
     gridphysical.cpp \
     gridvirtual.cpp \
-    solverlaxfriedrichs.cpp
+    solverlaxfriedrichs.cpp \
+    solver.cpp
 
 HEADERS += \
     grid.h \
     gridphysical.h \
     gridvirtual.h \
-    solverlaxfriedrichs.h
+    solverlaxfriedrichs.h \
+    solver.h
