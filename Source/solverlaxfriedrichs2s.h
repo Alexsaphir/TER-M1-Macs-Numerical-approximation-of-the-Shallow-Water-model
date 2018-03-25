@@ -22,7 +22,7 @@ public:
 
 private:
 	QPair<double, double> F(QPair<double, double> W) const;
-	//void evaluateFlux();
+	void evaluateFlux();
 	//void computeNext();
 	//double computeCFL() const;
 
@@ -45,5 +45,34 @@ private:
 	QPair<GridVirtual*, GridVirtual*> m_Flux;
 
 };
+
+QPair<double, double> operator+(const QPair<double, double> &A, const QPair<double, double> &B)
+{
+	QPair<double, double> tmp;
+	tmp.first = A.first + B.first;
+	tmp.second = A.second + B.second;
+	return tmp;
+}
+
+QPair<double, double> operator-(const QPair<double, double> &A, const QPair<double, double> &B)
+{
+	QPair<double, double> tmp;
+	tmp.first = A.first - B.first;
+	tmp.second = A.second - B.second;
+	return tmp;
+}
+
+QPair<double, double> operator*(double k, const QPair<double, double> &B)
+{
+	QPair<double, double> tmp;
+	tmp.first = k * B.first;
+	tmp.second = k * B.second;
+	return tmp;
+}
+
+QPair<double, double> operator*(const QPair<double, double> &B, double k)
+{
+	return k*B;
+}
 
 #endif // SOLVERLAXFRIEDRICHS2S_H
