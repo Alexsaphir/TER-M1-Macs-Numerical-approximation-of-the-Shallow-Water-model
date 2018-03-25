@@ -82,3 +82,19 @@ QPair<double, double> SolverLaxFriedrichs2S::F(QPair<double, double> W) const
 	FW.second = q*q/h + m_g*h*h/2.;
 	return FW;
 }
+
+void SolverLaxFriedrichs2S::evaluateFlux()
+{
+#pragma omp parallel
+	for(int i=0; i< m_N-1;++i)
+	{
+		QPair<double, double> Wr(m_Current.first->get(i + 1), m_Current.second->get(i + 1));
+		QPair<double, double> Wl(m_Current.first->get(i), m_Current.second->get(i));
+
+
+		QPair<double, double> tmp = .5*(F(Wl) + F(Wr)) + .5*m_dx/m_dt*(Wr - Wl);
+
+		m_Flux.first->set(i, tmp.first);
+		m_Flux.second->set(i, tmp.second);
+	}
+}
