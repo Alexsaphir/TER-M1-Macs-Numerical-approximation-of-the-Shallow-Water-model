@@ -79,6 +79,6 @@ QPair<double, double> SolverLaxFriedrichs2S::F(QPair<double, double> W) const
 	double q = W.second;
 
 	FW.first = q;
-	FW.second = q*q/h + g*h*h/2.;
+	FW.second = q*q/h + m_g*h*h/2.;
 	return FW;
 }
