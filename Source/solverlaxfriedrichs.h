@@ -17,7 +17,7 @@ public:
 	void solve();
 
 private:
-	double f(int i) const;
+	double F(double u) const;
 	void evaluateFlux();
 	void computeNext();
 	double computeCFL() const;

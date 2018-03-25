@@ -12,7 +12,7 @@ SolverLaxFriedrichs::SolverLaxFriedrichs(double l, double r): Solver()
 
 	m_N = (m_xmax - m_xmin) / m_dx + 1;
 
-	m_tmax = 10.;
+	m_tmax = .001;
 	m_t = 0.;
 	m_dt = 0.;
 	m_dtmax = 0.01;
@@ -43,6 +43,7 @@ void SolverLaxFriedrichs::swapGrid()
 
 void SolverLaxFriedrichs::initialCondition()
 {
+#pragma omp parallel
 	for(int i=0; i<m_N; ++i)
 	{
 		double x = m_xmin + m_dx*static_cast<double>(i);
@@ -63,35 +64,36 @@ void SolverLaxFriedrichs::solve()
 	m_t = 0.;
 
 	int k=0;
-	saveTo3d("Output/3D_out", m_Current, true);
+	//saveTo3d("Output/3D_out", m_Current, true);
+
 
 	while(m_t < m_tmax)
 	{
-		//saveGrid("Output/out-" + QString::number(k), m_Current);
+
 		//Compute the Next u
 		computeNext();
-		saveTo3d("Output/3D_out", m_Current);
+		//saveTo3d("Output/3D_out", m_Current);
 		++k;
 	}
-	//Save the last time
-	//saveGrid("Output/out-" + QString::number(m_t), m_Current);
+	saveGridCSV("Output/out.csv", m_Current);
+
 }
 
 
-double SolverLaxFriedrichs::f(int i) const
+double SolverLaxFriedrichs::F(double u) const
 {
-	double y = m_Current->get(i);
-	y *= y;
-	y /=2.;
-	return y;
+	return u*u/2.;
 }
 
 void SolverLaxFriedrichs::evaluateFlux()
 {
-	for(int i=1; i< m_N-1;++i)
+	#pragma omp parallel
+	for(int i=0; i< m_N-1;++i)
 	{
-		double v = ( f( m_Current->get(i) ) + f( m_Current->get(i + 1) ) )*.5 - .5/(m_dt/m_dx)*( m_Current->get(i+1) - m_Current->get(i));
+		double Wr = m_Current->get(i + 1);
+		double Wl = m_Current->get(i);
 
+		double v = .5*( F(Wl) - F(Wr)) - .5*m_dx/m_dt * (Wr - Wl);
 
 		m_Flux->set(i, v);
 	}
@@ -99,18 +101,16 @@ void SolverLaxFriedrichs::evaluateFlux()
 
 void SolverLaxFriedrichs::computeNext()
 {
-	//Compute the Flux of u
-	evaluateFlux();
-
 	//Find the best m_dt
 	m_dt = computeCFL();
 
+	//Compute the Flux of u
+	evaluateFlux();
+
+	#pragma omp parallel
 	for(int i=1; i< m_N-1;++i)
 	{
-		//m_Next->set(i, m_Current->get(i) - m_dt/m_dx*( m_Flux->get(i) - m_Flux->get(i - 1) ) );
-
-		double v = .5*( m_Current->get(i+1) + m_Current->get(i-1) ) - .5/(m_dt/m_dx)*( f( m_Current->get(i+1) ) - f( m_Current->get(i-1) ) );
-		m_Next->set(i, v);
+		m_Next->set(i, m_Current->get(i) - m_dt/m_dx*( m_Flux->get(i) - m_Flux->get(i - 1) ) );
 	}
 
 	//Apply Boundary
@@ -130,11 +130,19 @@ double SolverLaxFriedrichs::computeCFL() const
 
 	for(int i=1; i<m_Current->size(); ++i)
 	{
-		double der = (f(i) - f(i-1)) / m_dx;
+		double der = ( F(m_Current->get(i)) - F(m_Current->get(i-1)) ) / m_dx;
 		if (der > tmp)
 			tmp =der;
 	}
 	tmp = m_dx/2. * 1./tmp;
+	if(tmp + m_t > m_tmax)
+	{
+		if(tmp > m_tmax)
+		{
+
+		}
+	}
+
 	if (tmp > m_dtmax)
 		return m_dtmax;
 	return tmp;

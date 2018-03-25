@@ -8,10 +8,9 @@ int main(int argc, char *argv[])
 {
 	QCoreApplication a(argc, argv);
 
-	SolverLaxFriedrichs S(2., 2.);
+	SolverLaxFriedrichs S(3., 2.);
 
 	S.solve();
-
 
 	a.quit();
 }

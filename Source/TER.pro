@@ -1,5 +1,8 @@
 QT += core gui
 
+QMAKE_CXXFLAGS+= -fopenmp
+QMAKE_LFLAGS +=  -fopenmp
+
 SOURCES += \
     main.cpp \
     grid.cpp \
