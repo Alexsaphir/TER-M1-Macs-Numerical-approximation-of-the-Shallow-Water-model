@@ -5,6 +5,8 @@ SolverLaxFriedrichs2S::SolverLaxFriedrichs2S(double l, double r)
 	m_uL = l;
 	m_uR = r;
 
+	m_g = 10.;
+
 	m_xmin = -10.;
 	m_xmax = 10.;
 
@@ -68,4 +70,15 @@ void SolverLaxFriedrichs2S::initialCondition()
 
 		m_Current.second->set(i, 0.);
 	}
+}
+
+QPair<double, double> SolverLaxFriedrichs2S::F(QPair<double, double> W) const
+{
+	QPair<double, double> FW;
+	double h = W.first;
+	double q = W.second;
+
+	FW.first = q;
+	FW.second = q*q/h + g*h*h/2.;
+	return FW;
 }

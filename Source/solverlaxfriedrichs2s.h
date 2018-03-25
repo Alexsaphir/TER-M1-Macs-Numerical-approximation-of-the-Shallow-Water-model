@@ -21,7 +21,7 @@ public:
 	//void solve();
 
 private:
-	//double F(double u) const;
+	QPair<double, double> F(QPair<double, double> W) const;
 	//void evaluateFlux();
 	//void computeNext();
 	//double computeCFL() const;
@@ -36,6 +36,8 @@ private:
 
 	double m_uL;
 	double m_uR;
+
+	double m_g;
 
 	QPair<GridPhysical*, GridPhysical*> m_Current;
 	QPair<GridPhysical*, GridPhysical*> m_Next;
