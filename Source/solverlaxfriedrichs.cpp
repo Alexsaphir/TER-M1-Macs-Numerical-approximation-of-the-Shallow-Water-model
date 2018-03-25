@@ -5,14 +5,14 @@ SolverLaxFriedrichs::SolverLaxFriedrichs(double l, double r): Solver()
 	m_uL = l;
 	m_uR = r;
 
-	m_xmin = -5.;
-	m_xmax = 5.;
+	m_xmin = -10.;
+	m_xmax = 10.;
 
-	m_dx = .01;
+	m_dx = .005;
 
 	m_N = (m_xmax - m_xmin) / m_dx + 1;
 
-	m_tmax = .001;
+	m_tmax = 1.;
 	m_t = 0.;
 	m_dt = 0.;
 	m_dtmax = 0.01;
@@ -25,6 +25,7 @@ SolverLaxFriedrichs::SolverLaxFriedrichs(double l, double r): Solver()
 	m_Next		= new GridPhysical(m_N);
 
 	m_Flux		= new GridVirtual(*m_Current);
+	std::cout << "m_dx" << m_dx << std::endl;
 
 }
 
@@ -73,9 +74,10 @@ void SolverLaxFriedrichs::solve()
 		//Compute the Next u
 		computeNext();
 		//saveTo3d("Output/3D_out", m_Current);
+		std ::cout << m_t << std::endl;
 		++k;
 	}
-	saveGridCSV("Output/out.csv", m_Current);
+	saveGridCSV("out.csv", m_Current);
 
 }
 
@@ -87,13 +89,13 @@ double SolverLaxFriedrichs::F(double u) const
 
 void SolverLaxFriedrichs::evaluateFlux()
 {
-	#pragma omp parallel
+#pragma omp parallel
 	for(int i=0; i< m_N-1;++i)
 	{
 		double Wr = m_Current->get(i + 1);
 		double Wl = m_Current->get(i);
 
-		double v = .5*( F(Wl) - F(Wr)) - .5*m_dx/m_dt * (Wr - Wl);
+		double v = .5*( F(Wl) + F(Wr)) - .5/(m_dt/m_dx) * (Wr - Wl);
 
 		m_Flux->set(i, v);
 	}
@@ -106,8 +108,7 @@ void SolverLaxFriedrichs::computeNext()
 
 	//Compute the Flux of u
 	evaluateFlux();
-
-	#pragma omp parallel
+#pragma omp parallel
 	for(int i=1; i< m_N-1;++i)
 	{
 		m_Next->set(i, m_Current->get(i) - m_dt/m_dx*( m_Flux->get(i) - m_Flux->get(i - 1) ) );
@@ -132,7 +133,7 @@ double SolverLaxFriedrichs::computeCFL() const
 	{
 		double der = ( F(m_Current->get(i)) - F(m_Current->get(i-1)) ) / m_dx;
 		if (der > tmp)
-			tmp =der;
+			tmp = der;
 	}
 	tmp = m_dx/2. * 1./tmp;
 	if(tmp + m_t > m_tmax)
