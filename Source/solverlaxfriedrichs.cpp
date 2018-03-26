@@ -74,7 +74,7 @@ void SolverLaxFriedrichs::solve()
 		//Compute the Next u
 		computeNext();
 		//saveTo3d("Output/3D_out", m_Current);
-		std ::cout << m_t << std::endl;
+		std ::cout << m_dt << std::endl;
 		++k;
 	}
 	saveGridCSV("out.csv", m_Current);
@@ -136,16 +136,12 @@ double SolverLaxFriedrichs::computeCFL() const
 			tmp = der;
 	}
 	tmp = m_dx/2. * 1./tmp;
+	if (tmp > m_dtmax)
+		tmp = m_dtmax;
 	if(tmp + m_t > m_tmax)
 	{
-		if(tmp > m_tmax)
-		{
-
-		}
+		return m_tmax - m_t;
 	}
-
-	if (tmp > m_dtmax)
-		return m_dtmax;
 	return tmp;
 }
 
