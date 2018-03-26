@@ -18,13 +18,15 @@ public:
 
 
 	void initialCondition();
-	//void solve();
+	void solve();
 
 private:
 	QPair<double, double> F(QPair<double, double> W) const;
+	double F1(QPair<double, double> W) const;
+	double F2(QPair<double, double> W) const;
 	void evaluateFlux();
-	//void computeNext();
-	//double computeCFL() const;
+	void computeNext();
+	double computeCFL() const;
 
 private:
 	void swapGrid();
@@ -46,7 +48,7 @@ private:
 
 };
 
-QPair<double, double> operator+(const QPair<double, double> &A, const QPair<double, double> &B)
+inline QPair<double, double> operator+(const QPair<double, double> &A, const QPair<double, double> &B)
 {
 	QPair<double, double> tmp;
 	tmp.first = A.first + B.first;
@@ -54,7 +56,7 @@ QPair<double, double> operator+(const QPair<double, double> &A, const QPair<doub
 	return tmp;
 }
 
-QPair<double, double> operator-(const QPair<double, double> &A, const QPair<double, double> &B)
+inline QPair<double, double> operator-(const QPair<double, double> &A, const QPair<double, double> &B)
 {
 	QPair<double, double> tmp;
 	tmp.first = A.first - B.first;
@@ -62,7 +64,7 @@ QPair<double, double> operator-(const QPair<double, double> &A, const QPair<doub
 	return tmp;
 }
 
-QPair<double, double> operator*(double k, const QPair<double, double> &B)
+inline QPair<double, double> operator*(double k, const QPair<double, double> &B)
 {
 	QPair<double, double> tmp;
 	tmp.first = k * B.first;
@@ -70,7 +72,7 @@ QPair<double, double> operator*(double k, const QPair<double, double> &B)
 	return tmp;
 }
 
-QPair<double, double> operator*(const QPair<double, double> &B, double k)
+inline QPair<double, double> operator*(const QPair<double, double> &B, double k)
 {
 	return k*B;
 }
