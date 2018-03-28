@@ -5,6 +5,8 @@
 
 #include "grid.h"
 
+typedef QPair<double, double> VectorR2;
+
 class CoupledGrid
 {
 public:
@@ -15,8 +17,9 @@ public:
 	virtual Grid* second() const;
 
 	virtual double get(int i, int idx_grid) const;
-	virtual QPair<double, double> get(int i) const;
+	virtual VectorR2 get(int i) const;
 	virtual void set(int i, double value, int idx_grid);
+	virtual void set(int i, VectorR2 value);
 
 	double getOnFirst(int i) const;
 	double getOnSecond(int i) const;

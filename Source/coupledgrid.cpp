@@ -32,7 +32,7 @@ double CoupledGrid::get(int i, int idx_grid) const
 	else return 0.;
 }
 
-QPair<double, double> CoupledGrid::get(int i) const
+VectorR2 CoupledGrid::get(int i) const
 {
 	return qMakePair(getOnFirst(i), getOnSecond(i));
 }
@@ -57,6 +57,15 @@ void CoupledGrid::set(int i, double value, int idx_grid)
 		setOnFirst(i, value);
 	else if(idx_grid == 2)
 		setOnSecond(i, value);
+}
+
+void CoupledGrid::set(int i, VectorR2 value)
+{
+	if(m_grid1->isValidIndex(i) && m_grid1->isValidIndex(i))
+	{
+		m_grid1->set(i, value.first);
+		m_grid2->set(i, value.second);
+	}
 }
 
 void CoupledGrid::setOnFirst(int i, double value)
