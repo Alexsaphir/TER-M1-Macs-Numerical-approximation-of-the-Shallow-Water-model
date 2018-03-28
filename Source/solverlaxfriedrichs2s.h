@@ -9,6 +9,9 @@
 #include "gridphysical.h"
 #include "gridvirtual.h"
 
+#include "coupledgridflux.h"
+#include "coupledgridphysical.h"
+
 
 
 class SolverLaxFriedrichs2S : public Solver
@@ -21,9 +24,9 @@ public:
 	void solve();
 
 private:
-	QPair<double, double> F(QPair<double, double> W) const;
-	double F1(QPair<double, double> W) const;
-	double F2(QPair<double, double> W) const;
+	VectorR2 F(VectorR2 W) const;
+	double F1(VectorR2 W) const;
+	double F2(VectorR2 W) const;
 	void evaluateFlux();
 	void computeNext();
 	double computeCFL() const;
@@ -41,38 +44,38 @@ private:
 
 	double m_g;
 
-	QPair<GridPhysical*, GridPhysical*> m_Current;
-	QPair<GridPhysical*, GridPhysical*> m_Next;
+	CoupledGridPhysical *m_Current;
+	CoupledGridPhysical *m_Next;
 
-	QPair<GridVirtual*, GridVirtual*> m_Flux;
+	CoupledGridFlux *m_Flux;
 
 };
 
-inline QPair<double, double> operator+(const QPair<double, double> &A, const QPair<double, double> &B)
+inline VectorR2 operator+(const VectorR2 &A, const VectorR2 &B)
 {
-	QPair<double, double> tmp;
+	VectorR2 tmp;
 	tmp.first = A.first + B.first;
 	tmp.second = A.second + B.second;
 	return tmp;
 }
 
-inline QPair<double, double> operator-(const QPair<double, double> &A, const QPair<double, double> &B)
+inline VectorR2 operator-(const VectorR2 &A, const VectorR2 &B)
 {
-	QPair<double, double> tmp;
+	VectorR2 tmp;
 	tmp.first = A.first - B.first;
 	tmp.second = A.second - B.second;
 	return tmp;
 }
 
-inline QPair<double, double> operator*(double k, const QPair<double, double> &B)
+inline VectorR2 operator*(double k, const VectorR2 &B)
 {
-	QPair<double, double> tmp;
+	VectorR2 tmp;
 	tmp.first = k * B.first;
 	tmp.second = k * B.second;
 	return tmp;
 }
 
-inline QPair<double, double> operator*(const QPair<double, double> &B, double k)
+inline VectorR2 operator*(const VectorR2 &B, double k)
 {
 	return k*B;
 }

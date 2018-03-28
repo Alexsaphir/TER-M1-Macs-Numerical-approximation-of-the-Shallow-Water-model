@@ -17,27 +17,13 @@ SolverLaxFriedrichs2S::SolverLaxFriedrichs2S(double l, double r)
 	m_tmax = 1.;
 	m_t = 0.;
 	m_dt = 0.;
-	m_dtmax = 0.0001;
+	m_dtmax = 0.1;
 
-	m_Current.first = NULL;
-	m_Current.second = NULL;
+	m_Current = new CoupledGridPhysical(m_N);
+	m_Next = new CoupledGridPhysical(m_N);
+	m_Flux = new CoupledGridFlux(*m_Current);
 
-	m_Next.first = NULL;
-	m_Next.second = NULL;
-
-	m_Flux.first = NULL;
-	m_Flux.second = NULL;
-
-	m_Current.first = new GridPhysical(m_N);
-	m_Current.second = new GridPhysical(m_N);
-
-	m_Next.first = new GridPhysical(m_N);
-	m_Next.second = new GridPhysical(m_N);
-
-	m_Flux.first = new GridVirtual(*m_Current.first);
-	m_Flux.second = new GridVirtual(*m_Current.second);
-
-	std::cout << "m_dx" << m_dx << std::endl;
+	std::cout << "m_N " << m_N << std::endl;
 }
 
 void SolverLaxFriedrichs2S::solve()
@@ -52,8 +38,8 @@ void SolverLaxFriedrichs2S::solve()
 		computeNext();
 		std ::cout << m_t << std::endl;
 	}
-	saveGridCSV("outS2.csv", m_Current.first);
-	saveGridCSV("outS2_q.csv", m_Current.second);
+	saveGridCSV("outS2.csv", m_Current->first());
+	saveGridCSV("outS2_q.csv", m_Current->first());
 
 }
 
@@ -66,8 +52,7 @@ double SolverLaxFriedrichs2S::getX(int i) const
 
 void SolverLaxFriedrichs2S::swapGrid()
 {
-	std::swap(m_Current.first, m_Next.first);
-	std::swap(m_Current.second, m_Next.second);
+	std::swap(m_Current, m_Next);
 }
 
 void SolverLaxFriedrichs2S::initialCondition()
@@ -79,20 +64,20 @@ void SolverLaxFriedrichs2S::initialCondition()
 
 		if(x<0.)
 		{
-			m_Current.first->set(i, m_uL);
+			m_Current->setOnFirst(i, m_uL);
 		}
 		else
 		{
-			m_Current.first->set(i, m_uR);
+			m_Current->setOnFirst(i, m_uR);
 		}
 
-		m_Current.second->set(i, 0.);
+		m_Current->setOnSecond(i, 0.);
 	}
 }
 
-QPair<double, double> SolverLaxFriedrichs2S::F(QPair<double, double> W) const
+VectorR2 SolverLaxFriedrichs2S::F(VectorR2 W) const
 {
-	QPair<double, double> FW;
+	VectorR2 FW;
 
 	FW.first = F1(W);
 	FW.second = F2(W);
@@ -100,12 +85,12 @@ QPair<double, double> SolverLaxFriedrichs2S::F(QPair<double, double> W) const
 	return FW;
 }
 
-double SolverLaxFriedrichs2S::F1(QPair<double, double> W) const
+double SolverLaxFriedrichs2S::F1(VectorR2 W) const
 {
 	return W.second;//q
 }
 
-double SolverLaxFriedrichs2S::F2(QPair<double, double> W) const
+double SolverLaxFriedrichs2S::F2(VectorR2 W) const
 {
 	return W.second*W.second/W.first + m_g*W.first*W.first/2.;//q*q/h + g*h*h/2
 }
@@ -115,14 +100,13 @@ void SolverLaxFriedrichs2S::evaluateFlux()
 #pragma omp parallel
 	for(int i=0; i< m_N-1;++i)
 	{
-		QPair<double, double> Wr(m_Current.first->get(i + 1), m_Current.second->get(i + 1));
-		QPair<double, double> Wl(m_Current.first->get(i), m_Current.second->get(i));
+		VectorR2 Wr(m_Current->get(i + 1));
+		VectorR2 Wl(m_Current->get(i));
 
 
-		QPair<double, double> tmp = .5*(F(Wl) + F(Wr)) - .5/(m_dt/m_dx)*(Wr - Wl);
+		VectorR2 tmp = .5*(F(Wl) + F(Wr)) - .5/(m_dt/m_dx)*(Wr - Wl);
 
-		m_Flux.first->set(i, tmp.first);
-		m_Flux.second->set(i, tmp.second);
+		m_Flux->set(i, tmp);
 	}
 }
 
@@ -133,10 +117,10 @@ double SolverLaxFriedrichs2S::computeCFL() const
 
 	//return m_dtmax;
 
-	for(int i=1; i<m_Current.first->size(); ++i)
+	for(int i=1; i<m_Current->first()->size(); ++i)
 	{
-		double der  = ( F1(qMakePair( m_Current.first->get(i), m_Current.second->get(i)) ) - F1( qMakePair(m_Current.first->get(i-1), m_Current.second->get(i-1)) ) ) / m_dx;
-		double der2 = ( F2(qMakePair( m_Current.first->get(i), m_Current.second->get(i)) ) - F2( qMakePair(m_Current.first->get(i-1), m_Current.second->get(i-1)) ) ) / m_dx;
+		double der  = ( F1(m_Current->get(i)) - F1(m_Current->get(i-1)) ) / m_dx;
+		double der2 = ( F2(m_Current->get(i)) - F2(m_Current->get(i-1)) ) / m_dx;
 
 		if(der < der2)
 			der = der2;
@@ -165,16 +149,16 @@ void SolverLaxFriedrichs2S::computeNext()
 #pragma omp parallel
 	for(int i=1; i< m_N-1;++i)
 	{
-		m_Next.first->set(i, m_Current.first->get(i) - m_dt/m_dx*( m_Flux.first->get(i) - m_Flux.first->get(i - 1) ) );
-		m_Next.second->set(i, m_Current.second->get(i) - m_dt/m_dx*( m_Flux.second->get(i) - m_Flux.second->get(i-1) ) );
+		m_Next->set(i, m_Current->get(i) - m_dt/m_dx*( m_Flux->get(i) - m_Flux->get(i - 1) ) );
 	}
 
 	//Apply Boundary
-	m_Next.first->set(0, m_Current.first->get(0));
-	m_Next.second->set(0, m_Current.second->get(0));
+	m_Next->setOnFirst(0, m_Current->getOnFirst(0));
+	m_Next->setOnSecond(0, m_Current->getOnSecond(0));
 
-	m_Next.first->set(m_N-1, m_Current.first->get(m_N-1));
-	m_Next.second->set(m_N-1, m_Current.second->get(m_N-1));
+
+	m_Next->setOnFirst(m_N-1, m_Current->getOnFirst(m_N-1));
+	m_Next->setOnSecond(m_N-1, m_Current->getOnSecond(m_N-1));
 
 	//Swap the grid
 	swapGrid();
