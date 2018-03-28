@@ -16,6 +16,8 @@ public:
 
 	int size() const;
 
+	bool isValidIndex(int i) const;
+
 protected:
 	int m_n;
 	QVector<double> m_V;

@@ -2,7 +2,6 @@
 
 GridPhysical::GridPhysical(int N): Grid(N)
 {
-
 }
 
 double GridPhysical::get(int i) const
@@ -21,5 +20,4 @@ void GridPhysical::set(int i, double v)
 
 GridPhysical::~GridPhysical()
 {
-
 }
