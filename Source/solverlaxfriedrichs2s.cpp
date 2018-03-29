@@ -30,16 +30,20 @@ void SolverLaxFriedrichs2S::solve()
 {
 	initialCondition();
 	m_t = 0.;
-
+	int k=0;
+	//saveTo3d("X:\out3D.csv", m_Current->first(), true);
 	while(m_t < m_tmax)
 	{
 
 		//Compute the Next u
 		computeNext();
 		std ::cout << m_t << std::endl;
+		//saveTo3d("X:\out3D.csv", m_Current->first(), false);
+		//saveGridCSV("X:\outS" + QString::number(k) + ".csv", m_Current->first());
+		++k;
 	}
-	saveGridCSV("outS2.csv", m_Current->first());
-	saveGridCSV("outS2_q.csv", m_Current->first());
+	saveGridCSV("X:\outS2.csv", m_Current->first());
+	//saveGridCSV("outS2_q.csv", m_Current->second());
 
 }
 
@@ -77,12 +81,7 @@ void SolverLaxFriedrichs2S::initialCondition()
 
 VectorR2 SolverLaxFriedrichs2S::F(VectorR2 W) const
 {
-	VectorR2 FW;
-
-	FW.first = F1(W);
-	FW.second = F2(W);
-
-	return FW;
+	return qMakePair(F1(W), F2(W));
 }
 
 double SolverLaxFriedrichs2S::F1(VectorR2 W) const
@@ -95,18 +94,29 @@ double SolverLaxFriedrichs2S::F2(VectorR2 W) const
 	return W.second*W.second/W.first + m_g*W.first*W.first/2.;//q*q/h + g*h*h/2
 }
 
+
 void SolverLaxFriedrichs2S::evaluateFlux()
-{
+{//Compûte the flux in i+1/2
 #pragma omp parallel
 	for(int i=0; i< m_N-1;++i)
 	{
-		VectorR2 Wr(m_Current->get(i + 1));
-		VectorR2 Wl(m_Current->get(i));
+		//VectorR2 Wr(m_Current->get(i + 1));
+		//VectorR2 Wl(m_Current->get(i));
 
 
-		VectorR2 tmp = .5*(F(Wl) + F(Wr)) - .5/(m_dt/m_dx)*(Wr - Wl);
+		//VectorR2 tmp = .5*(F(Wl) + F(Wr)) - .5/(m_dt/m_dx)*(Wr - Wl);
 
-		m_Flux->set(i, tmp);
+		//m_Flux->set(i, tmp);
+
+		QPair<double, double> Wr(m_Current->getOnFirst(i+1), m_Current->getOnSecond(i+1));
+		QPair<double, double> Wl(m_Current->getOnFirst(i), m_Current->getOnSecond(i));
+
+
+		QPair<double, double> tmp = .5*(F(Wl) + F(Wr)) - .5/(m_dt/m_dx)*(Wr - Wl);
+
+		m_Flux->setOnFirst(i, tmp.first);
+		m_Flux->setOnSecond(i, tmp.second);
+
 	}
 }
 
@@ -149,7 +159,10 @@ void SolverLaxFriedrichs2S::computeNext()
 #pragma omp parallel
 	for(int i=1; i< m_N-1;++i)
 	{
-		m_Next->set(i, m_Current->get(i) - m_dt/m_dx*( m_Flux->get(i) - m_Flux->get(i - 1) ) );
+		//m_Next->set(i, m_Current->get(i) - m_dt/m_dx*( m_Flux->get(i) - m_Flux->get(i - 1) ) );
+
+		m_Next->setOnFirst(i, m_Current->getOnFirst(i) - m_dt/m_dx*( m_Flux->getOnFirst(i) - m_Flux->getOnFirst(i - 1) ) );
+		m_Next->setOnSecond(i, m_Current->getOnSecond(i) - m_dt/m_dx*( m_Flux->getOnSecond(i) - m_Flux->getOnSecond(i-1) ) );
 	}
 
 	//Apply Boundary

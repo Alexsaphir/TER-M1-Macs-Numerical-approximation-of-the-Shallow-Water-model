@@ -14,7 +14,8 @@ SOURCES += \
     coupledgrid.cpp \
     gridflux.cpp \
     coupledgridflux.cpp \
-    coupledgridphysical.cpp
+    coupledgridphysical.cpp \
+    solverlaxfriedrichssource2s.cpp
 
 HEADERS += \
     grid.h \
@@ -26,4 +27,5 @@ HEADERS += \
     coupledgrid.h \
     gridflux.h \
     coupledgridflux.h \
-    coupledgridphysical.h
+    coupledgridphysical.h \
+    solverlaxfriedrichssource2s.h

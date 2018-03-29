@@ -15,7 +15,7 @@ SolverLaxFriedrichs::SolverLaxFriedrichs(double l, double r): Solver()
 	m_tmax = 1.;
 	m_t = 0.;
 	m_dt = 0.;
-	m_dtmax = 0.01;
+	m_dtmax = 0.1;
 
 	m_Current = NULL;
 	m_Next = NULL;
@@ -25,7 +25,7 @@ SolverLaxFriedrichs::SolverLaxFriedrichs(double l, double r): Solver()
 	m_Next		= new GridPhysical(m_N);
 
 	m_Flux		= new GridVirtual(*m_Current);
-	std::cout << "m_dx" << m_dx << std::endl;
+	std::cout << "m_nx " << m_N << std::endl;
 
 }
 
@@ -74,7 +74,7 @@ void SolverLaxFriedrichs::solve()
 		//Compute the Next u
 		computeNext();
 		//saveTo3d("Output/3D_out", m_Current);
-		std ::cout << m_dt << std::endl;
+		//std ::cout << m_dt << std::endl;
 		++k;
 	}
 	saveGridCSV("out.csv", m_Current);

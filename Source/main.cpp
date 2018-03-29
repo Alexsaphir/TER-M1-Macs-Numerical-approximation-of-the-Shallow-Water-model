@@ -9,11 +9,11 @@ int main(int argc, char *argv[])
 {
 	QCoreApplication a(argc, argv);
 
-	//SolverLaxFriedrichs S(1., 2.);
+	//SolverLaxFriedrichs S(2., 3.);
 	//S.solve();
 
 
-	SolverLaxFriedrichs2S S2(2., 1.);
+	SolverLaxFriedrichs2S S2(3, 2.);
 	S2.solve();
 
 	a.quit();

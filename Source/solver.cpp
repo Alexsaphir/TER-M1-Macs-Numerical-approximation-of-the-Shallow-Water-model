@@ -73,7 +73,7 @@ void Solver::saveTo3d(QString filename, Grid *G, bool init) const
 
 	for(int i=0; i<G->size(); ++i)
 	{
-		out << getX(i) << " " << m_t << " " << G->get(i);
+		out << getX(i) << "," << m_t << "," << G->get(i);
 		out << endl;
 	}
 	file.close();
