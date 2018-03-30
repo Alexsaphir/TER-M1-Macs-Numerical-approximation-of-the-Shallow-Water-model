@@ -1,11 +1,14 @@
 #ifndef COUPLEDGRIDPHYSICAL_H
 #define COUPLEDGRIDPHYSICAL_H
 
+#include "coupledgrid.h"
+#include "gridphysical.h"
 
-class CoupledGridPhysical
+class CoupledGridPhysical: public CoupledGrid
 {
 public:
-	CoupledGridPhysical();
+	CoupledGridPhysical(int N);
+	~CoupledGridPhysical();
 };
 
 #endif // COUPLEDGRIDPHYSICAL_H
