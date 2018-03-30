@@ -9,7 +9,8 @@ CoupledGrid::CoupledGrid()
 
 CoupledGrid::~CoupledGrid()
 {
-
+	delete m_grid1;
+	delete m_grid2;
 }
 
 Grid* CoupledGrid::first() const
