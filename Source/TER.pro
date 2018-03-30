@@ -11,7 +11,8 @@ SOURCES += \
     gridphysical.cpp \
     coupledgridphysical.cpp \
     coupledgridflux.cpp \
-    vectorr2.cpp
+    vectorr2.cpp \
+    solver.cpp
 
 HEADERS += \
     grid.h \
@@ -20,4 +21,5 @@ HEADERS += \
     gridphysical.h \
     coupledgridphysical.h \
     coupledgridflux.h \
-    vectorr2.h
+    vectorr2.h \
+    solver.h
