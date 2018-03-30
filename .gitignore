@@ -31,7 +31,8 @@
 *.out
 *.app
 
+TER.pro.user*
+TER.pro.user
+
 # 
 build-TER-*/
-*.pro.user*
-*.pro.user

@@ -6,26 +6,16 @@ QMAKE_LFLAGS +=  -fopenmp
 SOURCES += \
     main.cpp \
     grid.cpp \
-    gridphysical.cpp \
-    gridvirtual.cpp \
-    solverlaxfriedrichs.cpp \
-    solver.cpp \
-    solverlaxfriedrichs2s.cpp \
-    coupledgrid.cpp \
     gridflux.cpp \
-    coupledgridflux.cpp \
+    coupledgrid.cpp \
+    gridphysical.cpp \
     coupledgridphysical.cpp \
-    solverlaxfriedrichssource2s.cpp
+    coupledgridflux.cpp
 
 HEADERS += \
     grid.h \
-    gridphysical.h \
-    gridvirtual.h \
-    solverlaxfriedrichs.h \
-    solver.h \
-    solverlaxfriedrichs2s.h \
-    coupledgrid.h \
     gridflux.h \
-    coupledgridflux.h \
+    coupledgrid.h \
+    gridphysical.h \
     coupledgridphysical.h \
-    solverlaxfriedrichssource2s.h
+    coupledgridflux.h

@@ -1,17 +1,11 @@
 #ifndef GRIDFLUX_H
 #define GRIDFLUX_H
 
-#include "grid.h"
-#include "gridphysical.h"
 
-class GridFlux: public Grid
+class GridFlux
 {
 public:
-	GridFlux(const GridPhysical &GP);
-	~GridFlux();
-
-	double get(int i) const;
-	void set(int i, double v);
+	GridFlux();
 };
 
 #endif // GRIDFLUX_H
