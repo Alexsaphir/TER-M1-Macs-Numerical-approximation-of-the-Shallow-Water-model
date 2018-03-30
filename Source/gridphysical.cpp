@@ -1,6 +1,10 @@
 #include "gridphysical.h"
 
-GridPhysical::GridPhysical()
+GridPhysical::GridPhysical(int N): Grid(N)
 {
 
+}
+
+GridPhysical::~GridPhysical()
+{
 }
