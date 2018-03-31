@@ -51,5 +51,6 @@ VectorR2 operator/(const VectorR2 &A, double d)
 
 VectorR2 abs(const VectorR2 &A)
 {
-	return VectorR2(A).abs();
+	VectorR2 B(A);B.abs();
+	return B;
 }
