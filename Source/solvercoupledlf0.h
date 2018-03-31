@@ -24,6 +24,7 @@ private:
 
 	void computeNext();
 	double computeCFL() const;
+	void swapCoupledGrid();
 
 private:
 	double m_uL;
