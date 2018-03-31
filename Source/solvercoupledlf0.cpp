@@ -41,7 +41,16 @@ double SolverCoupledLF0::F2(const VectorR2 &W) const
 
 void SolverCoupledLF0::evaluateFlux()
 {
+	for(int i=0; i<m_Flux->first()->size() - 1; ++i)
+	{
+		// Compute the flux Fi+1/2
+		wL = m_Current->get(i);
+		wR = m_Current->get(i+1);
 
+		VectorR2 tmp = .5*m_dt/m_dx*( F(wL) + F(wR) ) - .5*(wR -wL);
+
+		m_Flux->set(i, tmp);
+	}
 }
 
 void SolverCoupledLF0::initialCondition()
