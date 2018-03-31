@@ -9,7 +9,7 @@ SolverCoupledLF0::SolverCoupledLF0(double l, double r)
 
 	m_xmin = -10.;
 	m_xmax = 10.;
-	m_dx = .005;
+	m_dx = .001;
 	m_N = (m_xmax - m_xmin) / m_dx + 1;
 
 	m_tmax = 1.;
