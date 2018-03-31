@@ -6,7 +6,7 @@ int main(int argc, char *argv[])
 {
 	QCoreApplication a(argc, argv);
 
-	SolverCoupledLF0 S(3., 2.);
+	SolverCoupledLF0 S(5., 3.);
 	S.solve();
 
 	a.quit();
