@@ -18,6 +18,11 @@ Solver::~Solver()
 
 }
 
+double Solver::getX(int i) const
+{
+	return m_xmin + static_cast<double>(i)*m_dx;
+}
+
 void Solver::saveGrid(QString filename, Grid *G) const
 {
 	QFile file(filename);
