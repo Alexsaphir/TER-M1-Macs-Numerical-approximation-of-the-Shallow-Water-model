@@ -60,6 +60,24 @@ void Solver::saveGridCSV(QString filename, Grid *G) const
 	file.close();
 }
 
+void Solver::saveGridCSV(QString filename, Grid *G, Grid *offset) const
+{
+	QFile file(filename);
+	if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+		return;
+
+	QTextStream out(&file);
+
+	out << "\"x\",\"y\"" << endl;
+
+	for(int i=0; i<G->size(); ++i)
+	{
+		out << getX(i) << "," << G->get(i)+offset->get(i);
+		out << endl;
+	}
+	file.close();
+}
+
 void Solver::saveTo3d(QString filename, Grid *G, bool init) const
 {
 	QFile file(filename);
