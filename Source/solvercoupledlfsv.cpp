@@ -20,7 +20,7 @@ SolverCoupledLFSV::SolverCoupledLFSV(double l, double r)
 	m_Current = new CoupledGridPhysical(m_N);
 	m_Next = new CoupledGridPhysical(m_N);
 	m_Flux = new CoupledGridFlux(*m_Current);
-	m_H = new GridPhysical(m_N);
+	m_Z = new GridPhysical(m_N);
 }
 
 VectorR2 SolverCoupledLFSV::F(const VectorR2 &W) const
@@ -38,6 +38,36 @@ double SolverCoupledLFSV::F2(const VectorR2 &W) const
 	return W.y*W.y/W.x + m_g*W.x*W.x/2.;//q*q/h + g*h*h/2
 }
 
+double SolverCoupledLFSV::getCorrected_Z_half(int i) const
+{
+	return std::max(m_Z->get(i), m_Z->get(i+1));
+}
+
+double SolverCoupledLFSV::getCorrected_H_half_pos(int i) const
+{
+	return std::max(0., m_Current->getOnFirst(i + 1) + m_Z->get(i+1) - getCorrected_Z_half(i));
+}
+
+double SolverCoupledLFSV::getCorrected_H_half_min(int i) const
+{
+	return std::max(0., m_Current->getOnFirst(i) + m_Z->get(i) - getCorrected_Z_half(i));
+}
+
+double SolverCoupledLFSV::getCorrected_S_half_min(int i) const
+{
+	return 0.;
+}
+
+double SolverCoupledLFSV::getCorrected_S_half_pos(int i) const
+{
+	return 0.;
+}
+
+VectorR2 SolverCoupledLFSV::S(int i) const
+{
+	return VectorR2(0., m_g/2. * std::pow(getCorrected_H_half_min(i), 2.) - m_g/2. * std::pow(m_Current->getOnFirst(i), 2.));
+}
+
 void SolverCoupledLFSV::initialCondition()
 {
 	//h = .04*x^2
@@ -47,14 +77,14 @@ void SolverCoupledLFSV::initialCondition()
 	{
 		double c = 2;
 
-		m_H->set(i, .04*getX(i)*getX(i));
-		if( ( c-m_H->get(i) ) <0.)
+		m_Z->set(i, .04*getX(i)*getX(i));
+		if( ( c-m_Z->get(i) ) <0.)
 		{
 			m_Current->setOnFirst(i, 0);
 		}
 		else
 		{
-			m_Current->setOnFirst(i, c-m_H->get(i));
+			m_Current->setOnFirst(i, c-m_Z->get(i));
 		}
 
 		m_Current->setOnSecond(i, 0.);
@@ -64,9 +94,9 @@ void SolverCoupledLFSV::initialCondition()
 void SolverCoupledLFSV::exportData() const
 {
 	saveGridCSV("SV_ u.csv", m_Current->first());
-	saveGridCSV("SV_U.csv", m_Current->first(), m_H);
+	saveGridCSV("SV_U.csv", m_Current->first(), m_Z);
 	saveGridCSV("SV_Uv.csv", m_Current->second());
-	saveGridCSV("SV_H.csv", m_H);
+	saveGridCSV("SV_H.csv", m_Z);
 }
 
 void SolverCoupledLFSV::evaluateFlux()
