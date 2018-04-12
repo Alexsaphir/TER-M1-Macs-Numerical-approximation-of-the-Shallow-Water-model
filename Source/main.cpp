@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 	//SolverCoupledLF0 S(5., 3.);
 	//S.solve();
 
-	SolverCoupledLFSV S(3., 5.);
+	SolverCoupledLFSV S(5., 3.);
 	S.initialCondition();
 
 	S.solve();
