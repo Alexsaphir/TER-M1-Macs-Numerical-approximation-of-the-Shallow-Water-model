@@ -53,17 +53,6 @@ double SolverCoupledLFSV::getCorrected_H_half_min(int i) const
 	return std::max(0., m_Current->getOnFirst(i) + m_Z->get(i) - getCorrected_Z_half(i));
 }
 
-
-VectorR2 SolverCoupledLFSV::getCorrected_S_half_min(int i) const
-{
-	return VectorR2(0.,0.);
-}
-
-VectorR2 SolverCoupledLFSV::getCorrected_S_half_pos(int i) const
-{
-	return VectorR2(0.,0.);
-}
-
 VectorR2 SolverCoupledLFSV::getCorrected_U_half_min(int i) const
 {
 	VectorR2 V;
@@ -94,21 +83,13 @@ VectorR2 SolverCoupledLFSV::getCorrected_U_half_pos(int i) const
 
 VectorR2 SolverCoupledLFSV::S(int i) const
 {
+
+	return VectorR2(0,0);
 	VectorR2 Sa(0., m_g/2. * std::pow(getCorrected_H_half_min(i), 2.) - m_g/2. * std::pow(m_Current->getOnFirst(i), 2.));
 	VectorR2 Sb(0., m_g/2. * std::pow(m_Current->getOnFirst(i), 2.) - m_g/2. * std::pow(getCorrected_H_half_pos(i - 1), 2.));
 
 	return Sa + Sb;
 
-}
-
-VectorR2 SolverCoupledLFSV::getFluxLeft(int i) const
-{
-	return m_Flux->get(i) + VectorR2(0., m_g/2. * std::pow(m_Current->getOnFirst(i), 2.) - m_g/2. * std::pow(getCorrected_H_half_min(i), 2.));
-}
-
-VectorR2 SolverCoupledLFSV::getFluxRight(int i) const
-{
-	return m_Flux->get(i) + VectorR2(0., m_g/2. * std::pow(m_Current->getOnFirst(i+1), 2.) - m_g/2. * std::pow(getCorrected_H_half_pos(i), 2.));
 }
 
 void SolverCoupledLFSV::initialCondition()
@@ -118,7 +99,7 @@ void SolverCoupledLFSV::initialCondition()
 #pragma omp parallel
 	for(int i=0; i<m_N; ++i)
 	{
-		double c = 2;
+		/*double c = 2;
 
 		m_Z->set(i, .04*getX(i)*getX(i));
 		if( ( c-m_Z->get(i) ) <0.)
@@ -129,6 +110,18 @@ void SolverCoupledLFSV::initialCondition()
 		{
 			m_Current->setOnFirst(i, c-m_Z->get(i));
 		}
+		*/
+
+		double x = m_xmin + m_dx*static_cast<double>(i);
+
+		if(x<=0.)
+		{
+			m_Current->setOnFirst(i, m_uL);
+		}
+		else
+		{
+			m_Current->setOnFirst(i, m_uR);
+		}
 
 		m_Current->setOnSecond(i, 0.);
 	}
@@ -136,10 +129,10 @@ void SolverCoupledLFSV::initialCondition()
 
 void SolverCoupledLFSV::exportData() const
 {
-	saveGridCSV("SV_ u.csv", m_Current->first());
-	saveGridCSV("SV_U.csv", m_Current->first(), m_Z);
+	saveGridCSV("SV_ h.csv", m_Current->first());
+	saveGridCSV("SV_hWoffset.csv", m_Current->first(), m_Z);
 	saveGridCSV("SV_Uv.csv", m_Current->second());
-	saveGridCSV("SV_H.csv", m_Z);
+	saveGridCSV("SV_Z.csv", m_Z);
 }
 
 void SolverCoupledLFSV::evaluateFlux()
@@ -148,8 +141,11 @@ void SolverCoupledLFSV::evaluateFlux()
 	for(int i=0; i<m_N - 1; ++i)
 	{
 		// Compute the flux Fi+1/2
-		VectorR2 wL = getCorrected_U_half_min(i);
-		VectorR2 wR = getCorrected_U_half_pos(i);
+		//VectorR2 wL = getCorrected_U_half_min(i);
+		//VectorR2 wR = getCorrected_U_half_pos(i);
+
+		VectorR2 wL = m_Current->get(i);
+		VectorR2 wR = m_Current->get(i+1);
 
 		VectorR2 tmp = .5*( F(wL) + F(wR) ) - .5*m_dx/m_dt*(wR -wL);
 
@@ -202,13 +198,13 @@ void SolverCoupledLFSV::swapCoupledGrid()
 void SolverCoupledLFSV::computeNext()
 {
 	evaluateFlux();
+	if(m_t == 0.)
+		saveGridCSV("SV_Flux.csv", m_Flux->first());
 
 	#pragma omp parallel
 	for(int i=1; i<m_N-1; ++i)
 	{
-		//VectorR2 tmp = m_Current->get(i) - m_dt/m_dx * ( S(i) + m_Flux->get(i - 1) - m_Flux->get(i) );
-		VectorR2 tmp = m_Current->get(i) - m_dt/m_dx * (getFluxRight(i - 1) - getFluxLeft(i));
-
+		VectorR2 tmp = m_Current->get(i) - m_dt/m_dx * ( S(i) + m_Flux->get(i-1) - m_Flux->get(i) );
 		m_Next->set(i, tmp);
 	}
 

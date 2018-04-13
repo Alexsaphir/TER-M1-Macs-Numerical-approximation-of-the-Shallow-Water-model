@@ -27,15 +27,11 @@ private:
 	double getCorrected_H_half_pos(int i) const;
 	double getCorrected_H_half_min(int i) const;
 
-	VectorR2 getCorrected_S_half_pos(int i) const;
-	VectorR2 getCorrected_S_half_min(int i) const;
 	VectorR2 S(int i) const;
 
 	VectorR2 getCorrected_U_half_pos(int i) const;
 	VectorR2 getCorrected_U_half_min(int i) const;
 
-	VectorR2 getFluxLeft(int i) const;
-	VectorR2 getFluxRight(int i) const;
 
 	void computeNext();
 	double computeCFL() const;
