@@ -18,10 +18,13 @@ public:
 
 private:
 
-	double get_Z(int i) const;
-	double get_Z_half_Plus(int i) const;
-	double get_Z_half_Min(int i) const;
+	double getZ(int i) const;
+	double getZ_ph(int i) const;
+	double getZ_mh(int i) const;
 
+	double getH(int i) const;
+	double getH_php(int i) const;
+	double getH_phm(int i) const;
 
 private:
 	double m_uL;
