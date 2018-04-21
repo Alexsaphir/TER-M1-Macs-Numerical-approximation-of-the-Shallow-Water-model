@@ -18,6 +18,10 @@ public:
 
 private:
 
+	double get_Z(int i) const;
+	double get_Z_half_Plus(int i) const;
+	double get_Z_half_Min(int i) const;
+
 
 private:
 	double m_uL;

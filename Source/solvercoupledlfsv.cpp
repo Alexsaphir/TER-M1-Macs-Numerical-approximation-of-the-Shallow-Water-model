@@ -32,3 +32,19 @@ void SolverCoupledLFSV::solve()
 {
 
 }
+
+
+double SolverCoupledLFSV::get_Z(int i) const
+{
+	return m_Z->get(i);
+}
+
+double SolverCoupledLFSV::get_Z_half_Min(int i) const
+{
+	return get_Z_half_Plus(i-1);
+}
+
+double SolverCoupledLFSV::get_Z_half_Plus(int i) const
+{
+	return std::max(get_Z(i), get_Z(i+1));
+}
