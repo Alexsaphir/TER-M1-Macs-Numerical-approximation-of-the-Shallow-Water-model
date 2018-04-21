@@ -36,3 +36,5 @@ TER.pro.user
 
 # 
 build-TER-*/
+
+*.user
