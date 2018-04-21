@@ -23,10 +23,14 @@ private:
 	double getZ_ph(int i) const;
 
 	double getH(int i) const;
+	double getH_mhm(int i) const;
+	double getH_mhp(int i) const;
 	double getH_phm(int i) const;
 	double getH_php(int i) const;
 
 	VectorR2 getU(int i) const;
+	VectorR2 getU_mhm(int i) const;
+	VectorR2 getU_mhp(int i) const;
 	VectorR2 getU_phm(int i) const;
 	VectorR2 getU_php(int i) const;
 

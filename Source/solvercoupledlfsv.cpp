@@ -54,6 +54,16 @@ double SolverCoupledLFSV::getH(int i) const
 	return m_Current->getOnFirst(i);
 }
 
+double SolverCoupledLFSV::getH_mhm(int i) const
+{
+	return getH_phm(i - 1);
+}
+
+double SolverCoupledLFSV::getH_mhp(int i) const
+{
+	return getH_php(i - 1);
+}
+
 double SolverCoupledLFSV::getH_phm(int i) const
 {
 	return std::max(0., getH(i) + getZ(i) - getZ_ph(i));
@@ -68,6 +78,17 @@ VectorR2 SolverCoupledLFSV::getU(int i) const
 {
 	return m_Current->get(i);
 }
+
+VectorR2 SolverCoupledLFSV::getU_mhm(int i) const
+{
+	return getU_phm(i - 1);
+}
+
+VectorR2 SolverCoupledLFSV::getU_mhp(int i) const
+{
+	return getU_php(i - 1);
+}
+
 VectorR2 SolverCoupledLFSV::getU_phm(int i) const
 {
 	double h = 0.;
@@ -86,11 +107,11 @@ VectorR2 SolverCoupledLFSV::getU_php(int i) const
 	double h = 0.;
 	double q = 0.;
 
-	h = getH_php(i+1);
+	h = getH_php(i + 1);
 	if(getH(i+1) <= 0.)
 		q = 0.;// There is no water so speed of water == 0.
 	else
-		q = h * m_Current->getOnSecond(i+1)/getH(i+1);
+		q = h * m_Current->getOnSecond(i + 1)/getH(i + 1);
 
 	return VectorR2(h, q);
 }
