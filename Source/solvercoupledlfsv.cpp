@@ -115,3 +115,28 @@ VectorR2 SolverCoupledLFSV::getU_php(int i) const
 
 	return VectorR2(h, q);
 }
+
+VectorR2 SolverCoupledLFSV::getFlux_ph(int i) const
+{
+	return Flux(getU_phm(i), getU_php(i));
+}
+
+VectorR2 SolverCoupledLFSV::F(VectorR2 w) const
+{
+	return VectorR2(F1(w), F2(w));
+}
+
+double SolverCoupledLFSV::F1(VectorR2 w) const
+{
+	return w.y;
+}
+
+double SolverCoupledLFSV::F2(VectorR2 w) const
+{
+	return w.x * w.y + m_g * w.x * w.x / 2.;
+}
+
+VectorR2 SolverCoupledLFSV::Flux(VectorR2 wL, VectorR2 wR) const
+{
+	return .5*( ( F(wL) + F(wR) ) - m_dt/m_dx *( wR - wL ) );
+}

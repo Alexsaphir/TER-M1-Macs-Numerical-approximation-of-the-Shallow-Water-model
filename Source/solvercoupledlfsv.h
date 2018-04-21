@@ -34,6 +34,13 @@ private:
 	VectorR2 getU_phm(int i) const;
 	VectorR2 getU_php(int i) const;
 
+	VectorR2 getFlux_ph(int i) const;
+
+	VectorR2 F(VectorR2 w) const;
+	double F1(VectorR2 w) const;
+	double F2(VectorR2 w) const;
+	VectorR2 Flux(VectorR2 wL, VectorR2 wR) const;
+
 
 private:
 	double m_uL;
