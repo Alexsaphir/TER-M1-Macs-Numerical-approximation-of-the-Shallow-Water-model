@@ -63,3 +63,34 @@ double SolverCoupledLFSV::getH_php(int i) const
 {
 	return std::max(0., getH(i+1) + getZ(i+1) - getZ_ph(i));
 }
+
+VectorR2 SolverCoupledLFSV::getU(int i) const
+{
+	return m_Current->get(i);
+}
+VectorR2 SolverCoupledLFSV::getU_phm(int i) const
+{
+	double h = 0.;
+	double q = 0.;
+
+	h = getH_phm(i);
+	if(getH(i) <= 0.)
+		q = 0.;// There is no water so speed of water == 0.
+	else
+		q = h * m_Current->getOnSecond(i)/getH(i);
+
+	return VectorR2(h, q);
+}
+VectorR2 SolverCoupledLFSV::getU_php(int i) const
+{
+	double h = 0.;
+	double q = 0.;
+
+	h = getH_php(i+1);
+	if(getH(i+1) <= 0.)
+		q = 0.;// There is no water so speed of water == 0.
+	else
+		q = h * m_Current->getOnSecond(i+1)/getH(i+1);
+
+	return VectorR2(h, q);
+}
