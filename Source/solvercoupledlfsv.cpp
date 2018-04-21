@@ -12,7 +12,7 @@ SolverCoupledLFSV::SolverCoupledLFSV(double l, double r)
 	m_dx = .001;
 	m_N = (m_xmax - m_xmin) / m_dx + 1;
 
-	m_tmax = 1.;
+	m_tmax = .0002;
 	m_t = 0.;
 	m_dt = 0.;
 	m_dtmax = 0.1;
@@ -25,12 +25,36 @@ SolverCoupledLFSV::SolverCoupledLFSV(double l, double r)
 
 void SolverCoupledLFSV::initialCondition()
 {
+#pragma omp parallel
+	for(int i=0; i<m_N; ++i)
+	{
+		double x = m_xmin + m_dx*static_cast<double>(i);
 
+		if(x<=0.)
+		{
+			m_Current->setOnFirst(i, m_uL);
+		}
+		else
+		{
+			m_Current->setOnFirst(i, m_uR);
+		}
+		m_Z->set(i, 0);
+		m_Current->setOnSecond(i, 0.);
+	}
 }
 
 void SolverCoupledLFSV::solve()
 {
+	initialCondition();
 
+	while(m_t < m_tmax)
+	{
+		//Compute the Next u
+		m_dt = computeCFL();
+		computeNext();
+		std ::cout << "t:" << m_t << " dt:" << m_dt << std::endl;
+	}
+	saveGridCSV("FD0.csv", m_Current->first());
 }
 
 
@@ -116,6 +140,19 @@ VectorR2 SolverCoupledLFSV::getU_php(int i) const
 	return VectorR2(h, q);
 }
 
+VectorR2 SolverCoupledLFSV::getS(int i) const
+{
+	double q = 0.;
+
+	q = .5 * m_g * (std::pow(getH_phm(i), 2) + std::pow(getH_php(i), 2)) * (std::pow(getH_phm(i), 2) - std::pow(getH_php(i), 2));
+	return VectorR2(0., q);
+}
+
+VectorR2 SolverCoupledLFSV::getFlux_mh(int i) const
+{
+	return Flux(getU_mhm(i), getU_mhp(i));
+}
+
 VectorR2 SolverCoupledLFSV::getFlux_ph(int i) const
 {
 	return Flux(getU_phm(i), getU_php(i));
@@ -133,10 +170,77 @@ double SolverCoupledLFSV::F1(VectorR2 w) const
 
 double SolverCoupledLFSV::F2(VectorR2 w) const
 {
-	return w.x * w.y + m_g * w.x * w.x / 2.;
+	if( w.x <= 0.)
+		return 0.;
+	return w.y * w.y / w.x + m_g * w.x * w.x / 2.;
 }
 
 VectorR2 SolverCoupledLFSV::Flux(VectorR2 wL, VectorR2 wR) const
 {
-	return .5*( ( F(wL) + F(wR) ) - m_dt/m_dx *( wR - wL ) );
+
+	return .5*( F(wL) + F(wR) ) - .5*m_dt/m_dx *( wR - wL );
+}
+
+void SolverCoupledLFSV::evaluateFlux()
+{
+#pragma omp parallel
+	for(int i=0; i<m_N - 1; ++i)
+	{
+		// Compute the flux Fi+1/2
+		VectorR2 wL = getU_phm(i);
+		VectorR2 wR = getU_php(i);
+
+		VectorR2 tmp = .5*( F(wL) + F(wR) ) - .5*m_dx/m_dt*(wR -wL);
+
+		m_Flux->set(i, tmp);
+	}
+}
+
+double SolverCoupledLFSV::computeCFL() const
+{
+	double t = 0;
+	for(int i=1; i<m_N - 1; ++i)
+	{
+		VectorR2 D = ( m_Current->get(i+1) - m_Current->get(i-1) ) / (2.*m_dx);
+		D.abs();
+
+		if( t< D.x)
+			t = D.x;
+		if( t < D.y)
+			t = D.y;
+	}
+
+	//Max time step
+	t = m_dx / 2. * 1./t;
+
+	if(t > m_dtmax)
+		t= m_dtmax;
+	if(t+m_t > m_tmax)
+		return m_tmax - m_t;
+	if(t < .0000001)
+		return .0000001;
+	return t;
+}
+
+void SolverCoupledLFSV::computeNext()
+{
+#pragma omp parallel
+	for(int i=1; i<m_N-1; ++i)
+	{
+		VectorR2 tmp = m_Current->get(i) - m_dt/m_dx * ( getS(i) + m_Flux->get(i) - m_Flux->get(i-1) );
+		m_Next->set(i, tmp);
+	}
+
+	//Boundary Condition
+	// Dirichlet
+	m_Next->set(0, m_Current->get(0));
+	m_Next->set(m_N - 1, m_Current->get(m_N-1));
+
+	swapCoupledGrid();
+	m_t+=m_dt;
+}
+
+void SolverCoupledLFSV::swapCoupledGrid()
+{
+	std::swap(m_Current, m_Next);
 }
