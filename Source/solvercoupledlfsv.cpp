@@ -145,6 +145,7 @@ VectorR2 SolverCoupledLFSV::getS(int i) const
 	double q = 0.;
 
 	q = .5 * m_g * (std::pow(getH_phm(i), 2) + std::pow(getH_php(i), 2)) * (std::pow(getH_phm(i), 2) - std::pow(getH_php(i), 2));
+	return VectorR2(0., 0.);
 	return VectorR2(0., q);
 }
 
@@ -224,6 +225,7 @@ double SolverCoupledLFSV::computeCFL() const
 
 void SolverCoupledLFSV::computeNext()
 {
+	evaluateFlux();
 #pragma omp parallel
 	for(int i=1; i<m_N-1; ++i)
 	{
