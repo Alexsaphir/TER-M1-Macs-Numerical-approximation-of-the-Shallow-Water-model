@@ -7,9 +7,9 @@ SolverCoupledLFSV::SolverCoupledLFSV(double l, double r)
 
 	m_g = 10.;
 
-	m_xmin = -1.;
-	m_xmax = 1.;
-	m_dx = .001;
+	m_xmin = -10.;
+	m_xmax = 10.;
+	m_dx = .01;
 	m_N = (m_xmax - m_xmin) / m_dx + 1;
 
 	m_tmax = 1.;
@@ -34,13 +34,21 @@ void SolverCoupledLFSV::initialCondition()
 
 		if(x<=0.)
 		{
-			m_Current->setOnFirst(i, 1. - x*x);
+			m_Current->setOnFirst(i, 3.);
+			m_Z->set(i, 3.);
 		}
 		else
 		{
-			m_Current->setOnFirst(i, 1. - x*x);
+			m_Current->setOnFirst(i, 1.);
+			m_Z->set(i, 1.);
 		}
-		m_Z->set(i, x*x);
+
+		if( x <= 5 && x >= 2 )
+		{
+			m_Current->setOnFirst(i, 0.);
+			m_Z->set(i, 5.);
+		}
+		//m_Z->set(i,  .2 * std::sin(x));
 		m_Current->setOnSecond(i, 0.);
 	}
 }
@@ -61,8 +69,6 @@ void SolverCoupledLFSV::solve()
 	}
 
 	saveGridCSV("FD0.csv", m_Current->first(), m_Z);
-	saveGridCSV("Z.csv", m_Z);
-
 }
 
 
@@ -211,13 +217,14 @@ double SolverCoupledLFSV::computeCFL() const
 	double t = 0;
 	for(int i=1; i<m_N - 1; ++i)
 	{
-		VectorR2 D = ( m_Current->get(i+1) - m_Current->get(i-1) ) / (2.*m_dx);
-		D.abs();
-
-		if( t< D.x)
-			t = D.x;
-		if( t < D.y)
-			t = D.y;
+		//Compute u
+		double u = 0.;
+		double h = getH(i);
+		if (h <= 0.)
+			u = 0.;
+		else
+			u = m_Current->second()->get(i) / h;
+		t = std::max(t, std::max(std::abs(u + sqrt(m_g * h)), std::abs(u - sqrt(m_g * h)) ));
 	}
 
 	//Max time step
