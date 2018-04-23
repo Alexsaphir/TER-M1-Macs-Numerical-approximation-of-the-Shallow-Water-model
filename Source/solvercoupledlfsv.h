@@ -47,7 +47,7 @@ private:
 
 	void computeNext();
 	double computeCFL() const;
-	void swapCoupledGrid();
+	inline void swapCoupledGrid();
 
 
 private:
