@@ -1,9 +1,7 @@
 #include "solvercoupledlfsv.h"
 
-SolverCoupledLFSV::SolverCoupledLFSV(double l, double r)
+SolverCoupledLFSV::SolverCoupledLFSV()
 {
-	m_uL = l;
-	m_uR = r;
 
 	m_g = 10.;
 
@@ -21,6 +19,7 @@ SolverCoupledLFSV::SolverCoupledLFSV(double l, double r)
 	m_Next = new CoupledGridPhysical(m_N);
 	m_Flux = new CoupledGridFlux(*m_Current);
 	m_Z = new GridPhysical(m_N);
+	m_U = new GridPhysical(m_N);
 }
 
 void SolverCoupledLFSV::initialCondition()
@@ -31,25 +30,15 @@ void SolverCoupledLFSV::initialCondition()
 	for(int i=0; i<m_N; ++i)
 	{
 		double x = m_xmin + m_dx*static_cast<double>(i);
+		double z = .5*std::sin(x) + .5;
+		double h = 3. - z;
+		if (h<=0.)
+			h = 0;
+		double v = 1.;
 
-		if(x<=0.)
-		{
-			m_Current->setOnFirst(i, 3.);
-			m_Z->set(i, 3.);
-		}
-		else
-		{
-			m_Current->setOnFirst(i, 1.);
-			m_Z->set(i, 1.);
-		}
-
-		if( x <= 5 && x >= 2 )
-		{
-			m_Current->setOnFirst(i, 0.);
-			m_Z->set(i, 5.);
-		}
-		//m_Z->set(i,  .2 * std::sin(x));
-		m_Current->setOnSecond(i, 0.);
+		m_Current->setOnFirst(i, h);
+		m_Z->set(i, z);
+		m_Current->setOnSecond(i, v * h);
 	}
 }
 
@@ -59,7 +48,8 @@ void SolverCoupledLFSV::solve()
 
 	saveGridCSV("FD0_beg.csv", m_Current->first(), m_Z);
 	saveGridCSV("Z.csv", m_Z);
-
+	computeSpeed();
+	saveGridCSV("U_beg.csv", m_U);
 	while(m_t < m_tmax)
 	{
 		//Compute the Next u
@@ -67,7 +57,8 @@ void SolverCoupledLFSV::solve()
 		computeNext();
 		std ::cout << "t:" << m_t << " dt:" << m_dt << std::endl;
 	}
-
+	computeSpeed();
+	saveGridCSV("U.csv", m_U);
 	saveGridCSV("FD0.csv", m_Current->first(), m_Z);
 }
 
@@ -252,6 +243,9 @@ void SolverCoupledLFSV::computeNext()
 	m_Next->set(0, m_Current->get(0));
 	m_Next->set(m_N - 1, m_Current->get(m_N-1));
 
+	//m_Next->set(0, m_Next->get(1));
+	//m_Next->set(m_N - 1, m_Next->get(m_N-2));
+
 	swapCoupledGrid();
 	m_t+=m_dt;
 }
@@ -259,4 +253,17 @@ void SolverCoupledLFSV::computeNext()
 void SolverCoupledLFSV::swapCoupledGrid()
 {
 	std::swap(m_Current, m_Next);
+}
+
+void SolverCoupledLFSV::computeSpeed()
+{
+#pragma omp parallel
+	for(int i=0; i<m_N; ++i)
+	{
+		double h = m_Current->first()->get(i);
+		if(h<=0.)
+			m_U->set(i, 0.);
+		else
+			m_U->set(i, m_Current->second()->get(i)/h);
+	}
 }

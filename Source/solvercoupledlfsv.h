@@ -11,7 +11,7 @@
 class SolverCoupledLFSV : public Solver
 {
 public:
-	SolverCoupledLFSV(double l, double r);
+	SolverCoupledLFSV();
 
 	void initialCondition();
 	void solve();
@@ -49,10 +49,8 @@ private:
 	double computeCFL() const;
 	inline void swapCoupledGrid();
 
-
+	void computeSpeed();
 private:
-	double m_uL;
-	double m_uR;
 	double m_g;
 
 	CoupledGridPhysical *m_Current;
@@ -60,6 +58,7 @@ private:
 	CoupledGridFlux *m_Flux;
 
 	GridPhysical *m_Z;
+	GridPhysical *m_U;
 };
 
 #endif // SOLVERCOUPLEDLFSV_H

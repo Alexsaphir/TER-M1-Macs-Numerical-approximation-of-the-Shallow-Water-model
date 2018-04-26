@@ -5,7 +5,7 @@ Solver::Solver()
 	m_xmax = 0.;
 	m_xmin = 0.;
 	m_dx = 0.;
-	m_N= 0;
+	m_N = 0;
 
 	m_t = 0.;
 	m_tmax = 0.;
@@ -103,6 +103,36 @@ void Solver::saveTo3d(QString filename, Grid *G, bool init) const
 	for(int i=0; i<G->size(); ++i)
 	{
 		out << getX(i) << "," << m_t << "," << G->get(i);
+		out << endl;
+	}
+	file.close();
+}
+
+void Solver::saveTo3d(QString filename, Grid *G, Grid *offset, bool init) const
+{
+	QFile file(filename);
+
+	if(init)
+	{
+		if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+			return;
+	}
+	else
+	{
+		if (!file.open(QIODevice::Append | QIODevice::Text))
+			return;
+	}
+
+	QTextStream out(&file);
+	if(init)
+	{
+		//out << "# X T U U" << endl;
+		out << "\"x\",\"y\",\"z\"" << endl;
+	}
+
+	for(int i=0; i<G->size(); ++i)
+	{
+		out << getX(i)  << "," << G->get(i)+ offset->get(i)<< "," << m_t;
 		out << endl;
 	}
 	file.close();

@@ -23,6 +23,7 @@ protected:
 	void saveGridCSV(QString filename, Grid *G) const;
 	void saveGridCSV(QString filename, Grid *G, Grid *offset) const;
 	void saveTo3d(QString filename, Grid *G, bool init=false) const;
+	void saveTo3d(QString filename, Grid *G, Grid *offset, bool init=false) const;
 	virtual double getX(int i) const;
 
 protected:

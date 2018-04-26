@@ -22,6 +22,7 @@ public:
 	void setOnSecond(int i, double value);
 
 protected:
+
 	Grid *m_grid1;
 	Grid *m_grid2;
 
