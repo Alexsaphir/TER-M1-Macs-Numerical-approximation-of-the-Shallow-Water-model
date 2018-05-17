@@ -122,7 +122,7 @@ VectorR2 SolverCoupledLFSV::getU_phm(int i) const
 {
 	double h = 0.;
 	double q = 0.;
-
+	std::cout << "er";
 	h = getH_phm(i);
 	if(getH(i) <= 0.)
 		q = 0.;// There is no water so speed of water == 0.
@@ -191,7 +191,7 @@ VectorR2 SolverCoupledLFSV::Flux(VectorR2 wL, VectorR2 wR) const
 void SolverCoupledLFSV::evaluateFlux()
 {
 #pragma omp parallel
-	for(int i=0; i<m_N - 1; ++i)
+	for(int i=1; i<m_N - 1; ++i)
 	{
 		// Compute the flux Fi+1/2
 		VectorR2 wL = getU_phm(i);
@@ -231,7 +231,7 @@ double SolverCoupledLFSV::computeCFL() const
 void SolverCoupledLFSV::computeNext()
 {
 	evaluateFlux();
-#pragma omp parallel
+#pragma omp parallel for simd
 	for(int i=1; i<m_N-1; ++i)
 	{
 		VectorR2 tmp = m_Current->get(i) - m_dt/m_dx * ( m_Flux->get(i) - m_Flux->get(i-1) - getS(i) );//Be carefull '-' before ( .... )

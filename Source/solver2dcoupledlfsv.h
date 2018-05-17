@@ -11,7 +11,7 @@ class Solver2DCoupledLFSV
 public:
 	Solver2DCoupledLFSV();
 	void initialCondition();
-	void solve();
+	virtual void solve();
 };
 
 #endif // SOLVER2DCOUPLEDLFSV_H
