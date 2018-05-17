@@ -22,7 +22,8 @@ SOURCES += \
     solver2dcoupledlfsv.cpp \
     coupledgrid2d.cpp \
     coupledgrid2dflux.cpp \
-    coupledgrid2dphysical.cpp
+    coupledgrid2dphysical.cpp \
+    solvercoupledlfsv2.cpp
 
 HEADERS += \
     grid.h \
@@ -42,4 +43,5 @@ HEADERS += \
     solver2dcoupledlfsv.h \
     coupledgrid2d.h \
     coupledgrid2dflux.h \
-    coupledgrid2dphysical.h
+    coupledgrid2dphysical.h \
+    solvercoupledlfsv2.h
