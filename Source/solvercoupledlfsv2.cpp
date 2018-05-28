@@ -5,6 +5,39 @@ SolverCoupledLFSV2::SolverCoupledLFSV2(): SolverCoupledLFSV()
 
 }
 
+void SolverCoupledLFSV2::solve()
+{
+	initialCondition();
+
+	double t_elapsed =0.;
+	m_cache->addGrid(m_Current->first()->getRawVector());
+	m_cacheSpeed->addSpeedGrid(m_Current->first()->getRawVector(), m_Current->second()->getRawVector());
+	while(m_t < m_tmax)
+	{
+		//Compute the Next u
+		m_dt = computeCFL();
+		computeNext();
+
+		t_elapsed += m_dt;
+		std ::cout << "t:" << m_t << " dt:" << m_dt << std::endl;
+
+		if(t_elapsed >= m_dtmax)
+		{
+			m_cache->addGrid(m_Current->first()->getRawVector());
+			m_cacheSpeed->addSpeedGrid(m_Current->first()->getRawVector(), m_Current->second()->getRawVector());
+			t_elapsed =0.;
+		}
+
+	}
+	if(t_elapsed != 0.)
+	{
+		m_cache->addGrid(m_Current->first()->getRawVector());
+		m_cacheSpeed->addSpeedGrid(m_Current->first()->getRawVector(), m_Current->second()->getRawVector());
+	}
+	m_cache->save("LFSV2.csv");
+	m_cacheSpeed->save("LFSV2_V.csv");
+}
+
 void SolverCoupledLFSV2::computeNext()
 {
 	evaluateFlux();

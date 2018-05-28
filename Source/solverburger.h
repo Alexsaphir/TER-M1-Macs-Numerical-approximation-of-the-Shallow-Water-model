@@ -15,7 +15,7 @@ public:
 
 private:
 	double F(const double &W) const;
-	double Fder(const double&W) const;
+	double Fder(const double &W) const;
 	void evaluateFlux();
 
 	void computeNext();

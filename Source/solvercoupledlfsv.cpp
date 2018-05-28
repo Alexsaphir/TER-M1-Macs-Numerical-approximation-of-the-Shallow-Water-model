@@ -5,16 +5,6 @@ SolverCoupledLFSV::SolverCoupledLFSV()
 
 	m_g = 10.;
 
-	m_xmin = -10.;
-	m_xmax = 10.;
-	m_dx = .05;
-	m_N = (m_xmax - m_xmin) / m_dx + 1;
-
-	m_tmax = 1.;
-	m_t = 0.;
-	m_dt = 0.;
-	m_dtmax = 0.1;
-
 	m_Current = new CoupledGridPhysical(m_N);
 	m_Next = new CoupledGridPhysical(m_N);
 	m_Flux = new CoupledGridFlux(*m_Current);
@@ -26,19 +16,11 @@ void SolverCoupledLFSV::initialCondition()
 {
 	m_t = 0.;
 
+	initFunc(dynamic_cast<GridPhysical*>(m_Current->first()), 1, 3);
 #pragma omp parallel
 	for(int i=0; i<m_N; ++i)
 	{
-		double x = m_xmin + m_dx*static_cast<double>(i);
-		double z = .5*std::sin(x) + .5;
-		double h = 3. - z;
-		if (h<=0.)
-			h = 0;
-		double v = 1.;
-
-		m_Current->setOnFirst(i, h);
-		m_Z->set(i, z);
-		m_Current->setOnSecond(i, v * h);
+		m_Current->setOnSecond(i, 0.);
 	}
 }
 
@@ -46,20 +28,33 @@ void SolverCoupledLFSV::solve()
 {
 	initialCondition();
 
-	saveGridCSV("FD0_beg.csv", m_Current->first(), m_Z);
-	saveGridCSV("Z.csv", m_Z);
-	computeSpeed();
-	saveGridCSV("U_beg.csv", m_U);
+	double t_elapsed =0.;
+	m_cache->addGrid(m_Current->first()->getRawVector());
+	m_cacheSpeed->addSpeedGrid(m_Current->first()->getRawVector(), m_Current->second()->getRawVector());
 	while(m_t < m_tmax)
 	{
 		//Compute the Next u
 		m_dt = computeCFL();
 		computeNext();
+
+		t_elapsed += m_dt;
 		std ::cout << "t:" << m_t << " dt:" << m_dt << std::endl;
+
+		if(t_elapsed >= m_dtmax)
+		{
+			m_cache->addGrid(m_Current->first()->getRawVector());
+			m_cacheSpeed->addSpeedGrid(m_Current->first()->getRawVector(), m_Current->second()->getRawVector());
+			t_elapsed =0.;
+		}
+
 	}
-	computeSpeed();
-	saveGridCSV("U.csv", m_U);
-	saveGridCSV("FD0.csv", m_Current->first(), m_Z);
+	if(t_elapsed != 0.)
+	{
+		m_cache->addGrid(m_Current->first()->getRawVector());
+		m_cacheSpeed->addSpeedGrid(m_Current->first()->getRawVector(), m_Current->second()->getRawVector());
+	}
+	m_cache->save("LFSV.csv");
+	m_cacheSpeed->save("LFSV_V.csv");
 }
 
 
@@ -206,7 +201,7 @@ void SolverCoupledLFSV::evaluateFlux()
 double SolverCoupledLFSV::computeCFL() const
 {
 	double t = 0;
-	for(int i=1; i<m_N - 1; ++i)
+	for(int i=0; i<m_N; ++i)
 	{
 		//Compute u
 		double u = 0.;
@@ -243,8 +238,8 @@ void SolverCoupledLFSV::computeNext()
 	m_Next->set(0, m_Current->get(0));
 	m_Next->set(m_N - 1, m_Current->get(m_N-1));
 
-	//m_Next->set(0, m_Next->get(1));
-	//m_Next->set(m_N - 1, m_Next->get(m_N-2));
+	m_Next->set(0, m_Next->get(1));
+	m_Next->set(m_N - 1, m_Next->get(m_N-2));
 
 	swapCoupledGrid();
 	m_t+=m_dt;

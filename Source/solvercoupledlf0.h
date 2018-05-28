@@ -2,7 +2,6 @@
 #define SOLVERCOUPLEDLF0_H
 
 #include <QDebug>
-
 #include "solver.h"
 
 #include "coupledgridflux.h"

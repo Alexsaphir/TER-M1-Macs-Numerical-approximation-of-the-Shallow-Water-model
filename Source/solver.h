@@ -8,6 +8,7 @@
 #include <iostream>
 
 #include "grid.h"
+#include "gridphysical.h"
 #include "cachesolver.h"
 
 class Solver
@@ -27,8 +28,12 @@ protected:
 	void saveTo3d(QString filename, Grid *G, Grid *offset, bool init=false) const;
 	virtual double getX(int i) const;
 
+	void initFunc(GridPhysical *G, double uL, double uR);
+
 protected:
 	CacheSolver *m_cache;
+	CacheSolver *m_cacheSpeed;
+
 	double m_xmax;
 	double m_xmin;
 	double m_dx;
@@ -38,6 +43,7 @@ protected:
 	double m_t;
 	double m_dt;
 	double m_dtmax;
+
 };
 
 #endif // SOLVER_H

@@ -7,16 +7,6 @@ SolverCoupledLF0::SolverCoupledLF0(double l, double r)
 
 	m_g = 10.;
 
-	m_xmin = -5.;
-	m_xmax = 5.;
-	m_dx = .05;
-	m_N = (m_xmax - m_xmin) / m_dx + 1;
-
-	m_tmax = 1.;
-	m_t = 0.;
-	m_dt = 0.;
-	m_dtmax = 0.01;
-
 	m_Current = new CoupledGridPhysical(m_N);
 	m_Next = new CoupledGridPhysical(m_N);
 	m_Flux = new CoupledGridFlux(*m_Current);
@@ -30,12 +20,10 @@ VectorR2 SolverCoupledLF0::F(const VectorR2 &W) const
 double SolverCoupledLF0::F1(const VectorR2 &W) const
 {
 	return W.x * W.x / 2.;
-	return W.y;//q
 }
 
 double SolverCoupledLF0::F2(const VectorR2 &W) const
 {
-	return 0.;
 	return W.y*W.y/W.x + m_g*W.x*W.x/2.;//q*q/h + g*h*h/2
 }
 
@@ -56,19 +44,13 @@ void SolverCoupledLF0::evaluateFlux()
 
 void SolverCoupledLF0::initialCondition()
 {
+	m_t = 0.;
+
+	initFunc(dynamic_cast<GridPhysical*>(m_Current->first()), m_uL, m_uR);
+
 #pragma omp parallel
 	for(int i=0; i<m_N; ++i)
 	{
-		double x = m_xmin + m_dx*static_cast<double>(i);
-
-		if(x<=0.)
-		{
-			m_Current->setOnFirst(i, m_uL);
-		}
-		else
-		{
-			m_Current->setOnFirst(i, m_uR);
-		}
 		m_Current->setOnSecond(i, 0.);
 	}
 }
@@ -79,26 +61,31 @@ void SolverCoupledLF0::solve()
 
 	double t_elapsed =0.;
 	m_cache->addGrid(m_Current->first()->getRawVector());
+	m_cacheSpeed->addSpeedGrid(m_Current->first()->getRawVector(), m_Current->second()->getRawVector());
 	while(m_t < m_tmax)
 	{
 		//Compute the Next u
 		m_dt = computeCFL();
-
 		computeNext();
+
 		t_elapsed += m_dt;
 		std ::cout << "t:" << m_t << " dt:" << m_dt << std::endl;
 
 		if(t_elapsed >= m_dtmax)
 		{
 			m_cache->addGrid(m_Current->first()->getRawVector());
+			m_cacheSpeed->addSpeedGrid(m_Current->first()->getRawVector(), m_Current->second()->getRawVector());
 			t_elapsed =0.;
 		}
 
 	}
 	if(t_elapsed != 0.)
+	{
 		m_cache->addGrid(m_Current->first()->getRawVector());
-	saveGridCSV("FD0.csv", m_Current->first());
-	m_cache->save("cache.csv");
+		m_cacheSpeed->addSpeedGrid(m_Current->first()->getRawVector(), m_Current->second()->getRawVector());
+	}
+	m_cache->save("LF0.csv");
+	m_cacheSpeed->save("LF0_V.csv");
 }
 
 void SolverCoupledLF0::computeNext()
@@ -126,13 +113,15 @@ double SolverCoupledLF0::computeCFL() const
 	double t = 0;
 	for(int i=1; i<m_N - 1; ++i)
 	{
-		VectorR2 D = ( m_Current->get(i+1) - m_Current->get(i-1) ) / (2.*m_dx);
-		D.abs();
+		//Compute u
+		double u = 0.;
+		double h = m_Current->first()->get(i);
+		if (h <= 0.)
+			u = 0.;
+		else
+			u = m_Current->second()->get(i) / h;
+		t = std::max(t, std::max(std::abs(u + sqrt(m_g * h)), std::abs(u - sqrt(m_g * h)) ));
 
-		if( t< D.x)
-			t = D.x;
-		if( t < D.y)
-			t = D.y;
 	}
 
 	//Max time step

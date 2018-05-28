@@ -9,6 +9,7 @@ class SolverCoupledLFSV2 : public SolverCoupledLFSV
 {
 public:
 	SolverCoupledLFSV2();
+	void solve();
 
 protected:
 	void computeNext();

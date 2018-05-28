@@ -2,27 +2,47 @@
 
 Solver::Solver()
 {
-	m_xmax = 0.;
-	m_xmin = 0.;
-	m_dx = 0.;
-	m_N = 0;
+	m_xmin = -10.;
+	m_xmax = 10.;
+	m_dx = .005;
+	m_N = (m_xmax - m_xmin) / m_dx + 1;
 
+	m_tmax = 1.;
 	m_t = 0.;
-	m_tmax = 0.;
 	m_dt = 0.;
-	m_dtmax = 0.;
+	m_dtmax = 0.01;
 
 	m_cache = new CacheSolver;
+	m_cacheSpeed = new CacheSolver;
 }
 
 Solver::~Solver()
 {
 	delete m_cache;
+	delete m_cacheSpeed;
 }
 
 double Solver::getX(int i) const
 {
 	return m_xmin + static_cast<double>(i)*m_dx;
+}
+
+void Solver::initFunc(GridPhysical *G, double uL, double uR)
+{
+#pragma omp parallel
+	for(int i=0; i<m_N; ++i)
+	{
+		double x = m_xmin + m_dx*static_cast<double>(i);
+
+		if(x<=0.)
+		{
+			G->set(i, uL);
+		}
+		else
+		{
+			G->set(i, uR);
+		}
+	}
 }
 
 void Solver::saveGrid(QString filename, Grid *G) const

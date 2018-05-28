@@ -9,6 +9,7 @@
 #include <iostream>
 
 
+
 class CacheSolver
 {
 public:
@@ -16,6 +17,7 @@ public:
 	~CacheSolver();
 
 	void addGrid(const QVector<double> * G);
+	void addSpeedGrid(const QVector<double> * Vh, const QVector<double> * Vhu);
 
 	void save(QString filename) const;
 

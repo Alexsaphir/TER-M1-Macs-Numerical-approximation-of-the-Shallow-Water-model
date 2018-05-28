@@ -5,16 +5,6 @@ SolverBurger::SolverBurger(double l, double r)
 	m_uL = l;
 	m_uR = r;
 
-	m_xmin = -5.;
-	m_xmax = 5.;
-	m_dx = .05;
-	m_N = (m_xmax - m_xmin) / m_dx + 1;
-
-	m_tmax = 1.;
-	m_t = 0.;
-	m_dt = 0.;
-	m_dtmax = 0.01;
-
 	m_Current = new GridPhysical(m_N);
 	m_Next = new GridPhysical(m_N);
 	m_Flux = new GridFlux(*m_Current);
@@ -22,21 +12,9 @@ SolverBurger::SolverBurger(double l, double r)
 
 void SolverBurger::initialCondition()
 {
+	m_t = 0.;
 
-#pragma omp parallel
-	for(int i=0; i<m_N; ++i)
-	{
-		double x = m_xmin + m_dx*static_cast<double>(i);
-
-		if(x<=0.)
-		{
-			m_Current->set(i, m_uL);
-		}
-		else
-		{
-			m_Current->set(i, m_uR);
-		}
-	}
+	initFunc(m_Current, m_uL, m_uR);
 }
 
 void SolverBurger::solve()
@@ -99,7 +77,7 @@ void SolverBurger::computeNext()
 {
 	evaluateFlux();
 
-	#pragma omp parallel
+#pragma omp parallel
 	for(int i=1; i<m_N-1; ++i)
 	{
 		double tmp = m_Current->get(i) - m_dt/m_dx * (m_Flux->get(i) - m_Flux->get(i-1) );
