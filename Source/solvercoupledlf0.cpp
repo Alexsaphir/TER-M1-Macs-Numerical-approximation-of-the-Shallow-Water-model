@@ -19,7 +19,7 @@ VectorR2 SolverCoupledLF0::F(const VectorR2 &W) const
 
 double SolverCoupledLF0::F1(const VectorR2 &W) const
 {
-	return W.x * W.x / 2.;
+	return W.y;//q
 }
 
 double SolverCoupledLF0::F2(const VectorR2 &W) const
@@ -46,7 +46,7 @@ void SolverCoupledLF0::initialCondition()
 {
 	m_t = 0.;
 
-	initFunc(dynamic_cast<GridPhysical*>(m_Current->first()), m_uL, m_uR);
+	initFunc(dynamic_cast<GridPhysical*>(m_Current->first()), m_uR, m_uR);
 
 #pragma omp parallel
 	for(int i=0; i<m_N; ++i)

@@ -40,6 +40,23 @@ void CacheSolver::addSpeedGrid(const QVector<double> *Vh, const QVector<double> 
 	m_cache->append(tmp);
 }
 
+void CacheSolver::addCorrectedGrid(const QVector<double> *Vh, const QVector<double> *Vz)
+{
+	QVector<double> *tmp = new QVector<double>;
+	tmp->resize(Vh->size());
+#pragma omp parallel
+	for(int i=0; i<tmp->size(); ++i)
+	{
+		double h = Vh->at(i);
+		if(h<=0.)
+			tmp->replace(i, Vz->at(i));
+		else
+			tmp->replace(i, Vz->at(i) + h);
+	}
+
+	m_cache->append(tmp);
+}
+
 void CacheSolver::save(QString filename) const
 {
 	QFile file(filename);

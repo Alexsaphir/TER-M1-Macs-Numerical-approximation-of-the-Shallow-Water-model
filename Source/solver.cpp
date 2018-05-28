@@ -4,7 +4,7 @@ Solver::Solver()
 {
 	m_xmin = -10.;
 	m_xmax = 10.;
-	m_dx = .005;
+	m_dx = .05;
 	m_N = (m_xmax - m_xmin) / m_dx + 1;
 
 	m_tmax = 1.;

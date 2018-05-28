@@ -23,7 +23,7 @@ protected:
 
 	double getZ(int i) const;
 	double getH(int i) const;
-	VectorR2 getU(int i) const;
+	double getu(int i) const;
 
 private:
 	virtual double getZ_mh(int i) const;

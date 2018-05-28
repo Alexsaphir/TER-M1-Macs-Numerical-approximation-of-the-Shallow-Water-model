@@ -21,6 +21,7 @@ void SolverCoupledLFSV::initialCondition()
 	for(int i=0; i<m_N; ++i)
 	{
 		m_Current->setOnSecond(i, 0.);
+		m_Z->set(i, 0.);
 	}
 }
 
@@ -29,7 +30,7 @@ void SolverCoupledLFSV::solve()
 	initialCondition();
 
 	double t_elapsed =0.;
-	m_cache->addGrid(m_Current->first()->getRawVector());
+	m_cache->addCorrectedGrid(m_Current->first()->getRawVector(), m_Z->getRawVector());
 	m_cacheSpeed->addSpeedGrid(m_Current->first()->getRawVector(), m_Current->second()->getRawVector());
 	while(m_t < m_tmax)
 	{
@@ -42,7 +43,7 @@ void SolverCoupledLFSV::solve()
 
 		if(t_elapsed >= m_dtmax)
 		{
-			m_cache->addGrid(m_Current->first()->getRawVector());
+			m_cache->addCorrectedGrid(m_Current->first()->getRawVector(), m_Z->getRawVector());
 			m_cacheSpeed->addSpeedGrid(m_Current->first()->getRawVector(), m_Current->second()->getRawVector());
 			t_elapsed =0.;
 		}
@@ -50,7 +51,7 @@ void SolverCoupledLFSV::solve()
 	}
 	if(t_elapsed != 0.)
 	{
-		m_cache->addGrid(m_Current->first()->getRawVector());
+		m_cache->addCorrectedGrid(m_Current->first()->getRawVector(), m_Z->getRawVector());
 		m_cacheSpeed->addSpeedGrid(m_Current->first()->getRawVector(), m_Current->second()->getRawVector());
 	}
 	m_cache->save("LFSV.csv");
@@ -60,21 +61,29 @@ void SolverCoupledLFSV::solve()
 
 double SolverCoupledLFSV::getZ(int i) const
 {
+	if(i<0 || i>=m_N)
+		qDebug() << "Index error";
 	return m_Z->get(i);
 }
 
 double SolverCoupledLFSV::getZ_mh(int i) const
 {
-	return std::max(getZ(i-1), getZ(i));
+	if(i<0 || i>=m_N)
+		qDebug() << "Index error";
+	return getZ_ph(i-1);
 }
 
 double SolverCoupledLFSV::getZ_ph(int i) const
 {
+	if(i<0 || i>=m_N)
+		qDebug() << "Index error";
 	return std::max(getZ(i), getZ(i+1));
 }
 
 double SolverCoupledLFSV::getH(int i) const
 {
+	if(i<0 || i>=m_N)
+		qDebug() << "Index error";
 	return m_Current->getOnFirst(i);
 }
 
@@ -98,47 +107,48 @@ double SolverCoupledLFSV::getH_php(int i) const
 	return std::max(0., getH(i+1) + getZ(i+1) - getZ_ph(i));
 }
 
-VectorR2 SolverCoupledLFSV::getU(int i) const
+double SolverCoupledLFSV::getu(int i) const
 {
-	return m_Current->get(i);
+	if(i<0 || i>=m_N)
+		qDebug() << "Index error";
+
+	double h = m_Current->getOnFirst(i);
+	if(h <= 0)
+		return 0.;
+	else
+		return m_Current->getOnSecond(i) / h;
 }
 
 VectorR2 SolverCoupledLFSV::getU_mhm(int i) const
 {
+	if(i<0 || i>=m_N)
+		qDebug() << "Index error";
 	return getU_phm(i - 1);
 }
 
 VectorR2 SolverCoupledLFSV::getU_mhp(int i) const
 {
+	if(i<0 || i>=m_N)
+		qDebug() << "Index error";
 	return getU_php(i - 1);
 }
 
 VectorR2 SolverCoupledLFSV::getU_phm(int i) const
 {
 	double h = 0.;
-	double q = 0.;
 
 	h = getH_phm(i);
-	if(getH(i) <= 0.)
-		q = 0.;// There is no water so speed of water == 0.
-	else
-		q = h * m_Current->getOnSecond(i)/getH(i);
 
-	return VectorR2(h, q);
+	return VectorR2(h, h * getu(i));
 }
 
 VectorR2 SolverCoupledLFSV::getU_php(int i) const
 {
 	double h = 0.;
-	double q = 0.;
 
 	h = getH_php(i);
-	if(getH(i+1) <= 0.)
-		q = 0.;// There is no water so speed of water == 0.
-	else
-		q = h * m_Current->getOnSecond(i + 1)/getH(i + 1);
 
-	return VectorR2(h, q);
+	return VectorR2(h, h * getu(i+1));
 }
 
 VectorR2 SolverCoupledLFSV::getS(int i) const
@@ -150,6 +160,7 @@ VectorR2 SolverCoupledLFSV::getS(int i) const
 	return VectorR2(0., q);
 }
 
+
 VectorR2 SolverCoupledLFSV::getFlux_mh(int i) const
 {
 	return Flux(getU_mhm(i), getU_mhp(i));
@@ -159,6 +170,7 @@ VectorR2 SolverCoupledLFSV::getFlux_ph(int i) const
 {
 	return Flux(getU_phm(i), getU_php(i));
 }
+
 
 VectorR2 SolverCoupledLFSV::F(VectorR2 w) const
 {
@@ -177,6 +189,7 @@ double SolverCoupledLFSV::F2(VectorR2 w) const
 	return w.y * w.y / w.x + m_g * w.x * w.x / 2.;
 }
 
+
 VectorR2 SolverCoupledLFSV::Flux(VectorR2 wL, VectorR2 wR) const
 {
 
@@ -192,9 +205,7 @@ void SolverCoupledLFSV::evaluateFlux()
 		VectorR2 wL = getU_phm(i);
 		VectorR2 wR = getU_php(i);
 
-		VectorR2 tmp = .5*( F(wL) + F(wR) ) - .5*m_dx/m_dt*(wR - wL);
-
-		m_Flux->set(i, tmp);
+		m_Flux->set(i, Flux(wL, wR));
 	}
 }
 
@@ -207,7 +218,10 @@ double SolverCoupledLFSV::computeCFL() const
 		double u = 0.;
 		double h = getH(i);
 		if (h <= 0.)
+		{
 			u = 0.;
+			h = 0.;
+		}
 		else
 			u = m_Current->second()->get(i) / h;
 		t = std::max(t, std::max(std::abs(u + sqrt(m_g * h)), std::abs(u - sqrt(m_g * h)) ));
@@ -226,7 +240,7 @@ double SolverCoupledLFSV::computeCFL() const
 void SolverCoupledLFSV::computeNext()
 {
 	evaluateFlux();
-#pragma omp parallel for simd
+//#pragma omp parallel for simd
 	for(int i=1; i<m_N-1; ++i)
 	{
 		VectorR2 tmp = m_Current->get(i) - m_dt/m_dx * ( m_Flux->get(i) - m_Flux->get(i-1) - getS(i) );//Be carefull '-' before ( .... )
@@ -238,8 +252,8 @@ void SolverCoupledLFSV::computeNext()
 	m_Next->set(0, m_Current->get(0));
 	m_Next->set(m_N - 1, m_Current->get(m_N-1));
 
-	m_Next->set(0, m_Next->get(1));
-	m_Next->set(m_N - 1, m_Next->get(m_N-2));
+	//m_Next->set(0, m_Next->get(1));
+	//m_Next->set(m_N - 1, m_Next->get(m_N-2));
 
 	swapCoupledGrid();
 	m_t+=m_dt;

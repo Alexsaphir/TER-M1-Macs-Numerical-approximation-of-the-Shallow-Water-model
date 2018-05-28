@@ -18,6 +18,7 @@ public:
 
 	void addGrid(const QVector<double> * G);
 	void addSpeedGrid(const QVector<double> * Vh, const QVector<double> * Vhu);
+	void addCorrectedGrid(const QVector<double> * Vh, const QVector<double> * Vz);
 
 	void save(QString filename) const;
 
