@@ -7,15 +7,15 @@ SolverCoupledLF0::SolverCoupledLF0(double l, double r)
 
 	m_g = 10.;
 
-	m_xmin = -10.;
-	m_xmax = 10.;
-	m_dx = .001;
+	m_xmin = -5.;
+	m_xmax = 5.;
+	m_dx = .05;
 	m_N = (m_xmax - m_xmin) / m_dx + 1;
 
 	m_tmax = 1.;
 	m_t = 0.;
 	m_dt = 0.;
-	m_dtmax = 0.1;
+	m_dtmax = 0.01;
 
 	m_Current = new CoupledGridPhysical(m_N);
 	m_Next = new CoupledGridPhysical(m_N);
@@ -29,11 +29,13 @@ VectorR2 SolverCoupledLF0::F(const VectorR2 &W) const
 
 double SolverCoupledLF0::F1(const VectorR2 &W) const
 {
+	return W.x * W.x / 2.;
 	return W.y;//q
 }
 
 double SolverCoupledLF0::F2(const VectorR2 &W) const
 {
+	return 0.;
 	return W.y*W.y/W.x + m_g*W.x*W.x/2.;//q*q/h + g*h*h/2
 }
 
@@ -67,7 +69,6 @@ void SolverCoupledLF0::initialCondition()
 		{
 			m_Current->setOnFirst(i, m_uR);
 		}
-
 		m_Current->setOnSecond(i, 0.);
 	}
 }
@@ -76,14 +77,28 @@ void SolverCoupledLF0::solve()
 {
 	initialCondition();
 
+	double t_elapsed =0.;
+	m_cache->addGrid(m_Current->first()->getRawVector());
 	while(m_t < m_tmax)
 	{
 		//Compute the Next u
 		m_dt = computeCFL();
+
 		computeNext();
+		t_elapsed += m_dt;
 		std ::cout << "t:" << m_t << " dt:" << m_dt << std::endl;
+
+		if(t_elapsed >= m_dtmax)
+		{
+			m_cache->addGrid(m_Current->first()->getRawVector());
+			t_elapsed =0.;
+		}
+
 	}
+	if(t_elapsed != 0.)
+		m_cache->addGrid(m_Current->first()->getRawVector());
 	saveGridCSV("FD0.csv", m_Current->first());
+	m_cache->save("cache.csv");
 }
 
 void SolverCoupledLF0::computeNext()

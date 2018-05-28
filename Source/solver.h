@@ -8,6 +8,7 @@
 #include <iostream>
 
 #include "grid.h"
+#include "cachesolver.h"
 
 class Solver
 {
@@ -27,6 +28,7 @@ protected:
 	virtual double getX(int i) const;
 
 protected:
+	CacheSolver *m_cache;
 	double m_xmax;
 	double m_xmin;
 	double m_dx;

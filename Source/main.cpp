@@ -10,10 +10,10 @@ int main(int argc, char *argv[])
 {
 	QCoreApplication a(argc, argv);
 
-	//SolverCoupledLF0 S(3., 1.);
-	//S.solve();
+	SolverCoupledLF0 S0(1., 3.);
+	S0.solve();
 
-	SolverCoupledLFSV S;
+	/*SolverCoupledLFSV S;
 
 	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
 
@@ -25,6 +25,7 @@ int main(int argc, char *argv[])
 	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::duration<double>>( t2 - t1 ).count();
 	std::cout << "Solving duration (s): " << duration << std ::endl;
-
+*/
+	std::cout << "end";
 	a.quit();
 }

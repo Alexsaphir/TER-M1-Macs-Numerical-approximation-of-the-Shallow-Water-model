@@ -7,7 +7,7 @@ SolverCoupledLFSV::SolverCoupledLFSV()
 
 	m_xmin = -10.;
 	m_xmax = 10.;
-	m_dx = .01;
+	m_dx = .05;
 	m_N = (m_xmax - m_xmin) / m_dx + 1;
 
 	m_tmax = 1.;
@@ -122,7 +122,7 @@ VectorR2 SolverCoupledLFSV::getU_phm(int i) const
 {
 	double h = 0.;
 	double q = 0.;
-	std::cout << "er";
+
 	h = getH_phm(i);
 	if(getH(i) <= 0.)
 		q = 0.;// There is no water so speed of water == 0.

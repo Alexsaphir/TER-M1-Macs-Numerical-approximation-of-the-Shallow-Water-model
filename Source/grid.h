@@ -16,7 +16,7 @@ public:
 
 	virtual double get(int i) const;
 	virtual void set(int i, double v);
-
+	const QVector<double> *getRawVector() const;
 	int size() const;
 
 	bool isValidIndex(int i) const;

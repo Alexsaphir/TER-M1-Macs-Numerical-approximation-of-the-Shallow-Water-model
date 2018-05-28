@@ -57,3 +57,8 @@ void Grid::set(int i, double v)
 	}
 	m_V.replace(i, v);
 }
+
+const QVector<double> *Grid::getRawVector() const
+{
+	return &m_V;
+}

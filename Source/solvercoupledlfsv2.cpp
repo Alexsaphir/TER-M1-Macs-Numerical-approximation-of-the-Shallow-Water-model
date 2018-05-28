@@ -9,7 +9,7 @@ void SolverCoupledLFSV2::computeNext()
 {
 	evaluateFlux();
 #pragma omp parallel for simd
-	for(int i=2; i<m_N-1; ++i)
+	for(int i=1; i<m_N-1; ++i)
 	{
 		VectorR2 tmp = m_Current->get(i) - m_dt/m_dx * ( getF_l(i) - getF_r(i-1) - getS_ci(i) );//Be carefull '-' before ( .... )
 		m_Next->set(i, tmp);

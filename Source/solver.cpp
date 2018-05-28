@@ -11,11 +11,13 @@ Solver::Solver()
 	m_tmax = 0.;
 	m_dt = 0.;
 	m_dtmax = 0.;
+
+	m_cache = new CacheSolver;
 }
 
 Solver::~Solver()
 {
-
+	delete m_cache;
 }
 
 double Solver::getX(int i) const
