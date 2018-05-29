@@ -16,16 +16,16 @@ public:
 	void initialCondition();
 	void solve();
 
-protected:
+private:
 	VectorR2 F(VectorR2 w) const;
 	double F1(VectorR2 w) const;
 	double F2(VectorR2 w) const;
 
 	double getZ(int i) const;
 	double getH(int i) const;
-	double getu(int i) const;
+	double getV(int i) const;
 
-private:
+
 	double getZ_mh(int i) const;
 	double getZ_ph(int i) const;
 
@@ -42,17 +42,12 @@ private:
 
 	VectorR2 getS(int i) const;
 
-protected:
-	//virtual VectorR2 getFlux_mh(int i) const;
-	//virtual VectorR2 getFlux_ph(int i) const;
-protected:
+
+private:
 	void evaluateFlux();
-
-
 	VectorR2 Flux(VectorR2 wL, VectorR2 wR) const;
-	void computeNext();
 
-protected:
+	void computeNext();
 	double computeCFL() const;
 	void swapCoupledGrid();
 	void computeSpeed();

@@ -5,7 +5,7 @@
 #include "solverburger.h"
 #include "solvercoupledlfsv.h"
 #include "solvercoupledlf0.h"
-//#include "solvercoupledlfsv2.h"
+#include "solvercoupledlfsv2.h"
 
 int main(int argc, char *argv[])
 {
@@ -20,10 +20,10 @@ int main(int argc, char *argv[])
 	//S0.solve();
 
 	SolverCoupledLFSV SSV;
-	SSV.solve();
+	//SSV.solve();
 
-	//SolverCoupledLFSV2 SSV2;
-	//SSV2.solve();
+	SolverCoupledLFSV2 SSV2;
+	SSV2.solve();
 
 
 	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();

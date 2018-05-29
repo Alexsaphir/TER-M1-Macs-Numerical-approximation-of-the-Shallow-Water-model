@@ -19,6 +19,7 @@ private:
 	VectorR2 F(const VectorR2 &W) const;
 	double F1(const VectorR2 &W) const;
 	double F2(const VectorR2 &W) const;
+
 	void evaluateFlux();
 
 	void computeNext();

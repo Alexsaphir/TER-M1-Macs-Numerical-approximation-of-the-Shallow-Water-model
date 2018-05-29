@@ -15,6 +15,7 @@ SOURCES += \
     solver.cpp \
     solvercoupledlf0.cpp \
     solvercoupledlfsv.cpp \
+    solvercoupledlfsv2.cpp \
     cachesolver.cpp \
     solverburger.cpp
 
@@ -29,5 +30,6 @@ HEADERS += \
     solver.h \
     solvercoupledlf0.h \
     solvercoupledlfsv.h \
+    solvercoupledlfsv2.h \
     cachesolver.h \
     solverburger.h

@@ -9,7 +9,6 @@ SolverCoupledLFSV::SolverCoupledLFSV()
 	m_Next = new CoupledGridPhysical(m_N);
 	m_Flux = new CoupledGridFlux(*m_Current);
 	m_Z = new GridPhysical(m_N);
-	m_U = new GridPhysical(m_N);
 }
 
 void SolverCoupledLFSV::initialCondition()
@@ -23,7 +22,7 @@ void SolverCoupledLFSV::initialCondition()
 		m_Z->set(i, 0.);
 	}
 
-	initFunc(dynamic_cast<GridPhysical*>(m_Current->first()), 3., 1.);
+	initFunc(dynamic_cast<GridPhysical*>(m_Current->first()), 3., 10.);
 }
 
 void SolverCoupledLFSV::solve()
@@ -88,7 +87,7 @@ double SolverCoupledLFSV::getH(int i) const
 	return m_Current->getOnFirst(i);
 }
 
-double SolverCoupledLFSV::getu(int i) const
+double SolverCoupledLFSV::getV(int i) const
 {
 	double h = getH(i);
 	if(h <= 0.)
@@ -143,13 +142,13 @@ VectorR2 SolverCoupledLFSV::getU_mhp(int i) const
 VectorR2 SolverCoupledLFSV::getU_phm(int i) const
 {
 	double h = getH_phm(i);
-	return VectorR2(h, h * getu(i));
+	return VectorR2(h, h * getV(i));
 }
 
 VectorR2 SolverCoupledLFSV::getU_php(int i) const
 {
 	double h = getH_php(i);
-	return VectorR2(h, h * getu(i+1));
+	return VectorR2(h, h * getV(i+1));
 }
 
 

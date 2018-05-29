@@ -38,7 +38,10 @@ double Grid::get(int i) const
 	if(i<0 || i>=m_n)
 	{
 		qDebug() << "Get Grid error";
-		return 0.;
+		if(i<0)
+			return m_V.at(0);
+		if(i>=m_n)
+			return m_V.at(m_n-1);
 	}
 	return m_V.at(i);
 }
