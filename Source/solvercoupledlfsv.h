@@ -14,7 +14,7 @@ public:
 	SolverCoupledLFSV();
 
 	void initialCondition();
-	virtual void solve();
+	void solve();
 
 protected:
 	VectorR2 F(VectorR2 w) const;
@@ -26,31 +26,31 @@ protected:
 	double getu(int i) const;
 
 private:
-	virtual double getZ_mh(int i) const;
-	virtual double getZ_ph(int i) const;
+	double getZ_mh(int i) const;
+	double getZ_ph(int i) const;
 
-	virtual double getH_mhm(int i) const;
-	virtual double getH_mhp(int i) const;
-	virtual double getH_phm(int i) const;
-	virtual double getH_php(int i) const;
+	double getH_mhm(int i) const;
+	double getH_mhp(int i) const;
+	double getH_phm(int i) const;
+	double getH_php(int i) const;
 
 
-	virtual VectorR2 getU_mhm(int i) const;
-	virtual VectorR2 getU_mhp(int i) const;
-	virtual VectorR2 getU_phm(int i) const;
-	virtual VectorR2 getU_php(int i) const;
+	VectorR2 getU_mhm(int i) const;
+	VectorR2 getU_mhp(int i) const;
+	VectorR2 getU_phm(int i) const;
+	VectorR2 getU_php(int i) const;
 
-	virtual VectorR2 getS(int i) const;
+	VectorR2 getS(int i) const;
 
 protected:
-	virtual VectorR2 getFlux_mh(int i) const;
-	virtual VectorR2 getFlux_ph(int i) const;
+	//virtual VectorR2 getFlux_mh(int i) const;
+	//virtual VectorR2 getFlux_ph(int i) const;
 protected:
-	virtual void evaluateFlux();
+	void evaluateFlux();
 
 
 	VectorR2 Flux(VectorR2 wL, VectorR2 wR) const;
-	virtual void computeNext();
+	void computeNext();
 
 protected:
 	double computeCFL() const;
