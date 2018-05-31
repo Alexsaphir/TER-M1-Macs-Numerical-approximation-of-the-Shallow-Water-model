@@ -2,7 +2,16 @@
 
 SolverCoupledLFSV::SolverCoupledLFSV()
 {
+	m_g = 10.;
 
+	m_Current = new CoupledGridPhysical(m_N);
+	m_Next = new CoupledGridPhysical(m_N);
+	m_Flux = new CoupledGridFlux(*m_Current);
+	m_Z = new GridPhysical(m_N);
+}
+
+SolverCoupledLFSV::SolverCoupledLFSV(int N): Solver(N)
+{
 	m_g = 10.;
 
 	m_Current = new CoupledGridPhysical(m_N);
@@ -13,16 +22,62 @@ SolverCoupledLFSV::SolverCoupledLFSV()
 
 void SolverCoupledLFSV::initialCondition()
 {
+	initialConditionOscillating();
+	/*
 	m_t = 0.;
-
+	m_tmax = 2.;
 #pragma omp parallel
 	for(int i=0; i<m_N; ++i)
 	{
-		m_Current->setOnSecond(i, 0.);
-		m_Z->set(i, 0.);
+		double x = m_xmin + m_dx*static_cast<double>(i);
+		if(i==0)
+		{
+			m_Current->setOnFirst(i, 1.);
+			m_Current->setOnSecond(i, m_Current->getOnFirst(i) * 5.);
+		}
+		if(x<=0.)
+			m_Z->set(i, 2);
+		if(x>0)
+			m_Current->setOnFirst(i, .5);
+
 	}
 
-	initFunc(dynamic_cast<GridPhysical*>(m_Current->first()), 3., 10.);
+	initFunc(dynamic_cast<GridPhysical*>(m_Current->first()), 3., .5);
+	initialConditionOscillating();
+	*/
+}
+
+void SolverCoupledLFSV::initialConditionOscillating()
+{
+	m_tmax = 19.87;
+	m_xmax = 1.;
+	m_xmin = 0.;
+	m_dx = (m_xmax - m_xmin) / (m_N - 1);
+#pragma omp parallel
+	for(int i=0; i<m_N; ++i)
+	{
+		double x = m_xmin + m_dx*static_cast<double>(i);
+		m_Current->setOnSecond(i, 0.);
+		m_Z->set(i, .5*(1-.5*(std::cos(M_PI*(x-.5)/.5)+1)));
+		m_Current->setOnFirst(i, std::max(0., .4 - m_Z->get(i) + .04*std::sin((x-.5)/.25) - std::max(0., -4.+ m_Z->get(i))));
+	}
+}
+
+void SolverCoupledLFSV::initialConditionRest()
+{
+	m_t = 0.;
+#pragma omp parallel
+	for(int i=0; i<m_N; ++i)
+	{
+		double x = m_xmin + m_dx*static_cast<double>(i);
+		if(std::abs(x) < 8)
+		{
+			m_Current->setOnFirst(i, 16./5. - x*x/20.);
+
+		}
+		m_Z->set(i, x*x/20);
+
+	}
 }
 
 void SolverCoupledLFSV::solve()
@@ -54,6 +109,7 @@ void SolverCoupledLFSV::solve()
 		m_cache->addCorrectedGrid(m_Current->first()->getRawVector(), m_Z->getRawVector());
 		m_cacheSpeed->addSpeedGrid(m_Current->first()->getRawVector(), m_Current->second()->getRawVector());
 	}
+	saveGridPython("LFSV_Z.csv", m_Z);
 	m_cache->save("LFSV.csv");
 	m_cacheSpeed->save("LFSV_V.csv");
 }
@@ -154,10 +210,8 @@ VectorR2 SolverCoupledLFSV::getU_php(int i) const
 
 VectorR2 SolverCoupledLFSV::getS(int i) const
 {
-	//return VectorR2(0.,0.);
-
 	double h1 = getH_phm(i);
-	double h2 = getH_mhp(i);
+	double h2 = getH_php(i-1);
 
 	return VectorR2(0., .5*m_g*(h1*h1 - h2*h2) );
 }
@@ -213,8 +267,8 @@ double SolverCoupledLFSV::computeCFL() const
 void SolverCoupledLFSV::computeNext()
 {
 	evaluateFlux();
-#pragma omp parallel for simd
-	for(int i=2; i<m_N-1; ++i)
+#pragma omp parallel
+	for(int i=1; i<m_N-1; ++i)
 	{
 		VectorR2 tmp = m_Current->get(i) - m_dt/m_dx * ( m_Flux->get(i) - m_Flux->get(i-1) - getS(i) );//Be carefull '-' before ( .... )
 		m_Next->set(i, tmp);
@@ -225,8 +279,8 @@ void SolverCoupledLFSV::computeNext()
 	m_Next->set(0, m_Current->get(0));
 	m_Next->set(m_N - 1, m_Current->get(m_N-1));
 
-	//m_Next->set(0, m_Next->get(1));
-	//m_Next->set(m_N - 1, m_Next->get(m_N-2));
+	m_Next->set(0, m_Next->get(1));
+	m_Next->set(m_N - 1, m_Next->get(m_N-2));
 
 	swapCoupledGrid();
 	m_t+=m_dt;

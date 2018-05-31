@@ -11,8 +11,12 @@ class SolverCoupledLFSV2 : public Solver
 {
 public:
 	SolverCoupledLFSV2();
+	SolverCoupledLFSV2(int N);
 
 	void initialCondition();
+	void initialConditionOscillating();
+	void initialConditionRest();
+
 	void solve();
 
 private:
