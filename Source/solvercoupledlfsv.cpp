@@ -22,7 +22,8 @@ SolverCoupledLFSV::SolverCoupledLFSV(int N): Solver(N)
 
 void SolverCoupledLFSV::initialCondition()
 {
-	initialConditionOscillating();
+	//initialConditionOscillating();
+	initialConditionDam();
 	/*
 	m_t = 0.;
 	m_tmax = 2.;
@@ -49,7 +50,7 @@ void SolverCoupledLFSV::initialCondition()
 
 void SolverCoupledLFSV::initialConditionOscillating()
 {
-	m_tmax = 19.87;
+	m_tmax = 27;
 	m_xmax = 1.;
 	m_xmin = 0.;
 	m_dx = (m_xmax - m_xmin) / (m_N - 1);
@@ -77,6 +78,30 @@ void SolverCoupledLFSV::initialConditionRest()
 		}
 		m_Z->set(i, x*x/20);
 
+	}
+}
+
+void SolverCoupledLFSV::initialConditionDam()
+{
+#pragma omp parallel
+	for(int i=0; i<m_N; ++i)
+	{
+		double x = m_xmin + m_dx*static_cast<double>(i);
+		if(x < -7.1)
+		{
+			m_Z->set(i,4.);
+			m_Current->setOnFirst(i, 5);
+		}
+		else if(x <=-7.)
+		{
+			m_Z->set(i,5.);
+			m_Current->setOnFirst(i, 4);
+		}
+		else
+		{
+			//m_Z->set(i,1./x);
+			m_Current->setOnFirst(i, .5);
+		}
 	}
 }
 
@@ -279,8 +304,8 @@ void SolverCoupledLFSV::computeNext()
 	m_Next->set(0, m_Current->get(0));
 	m_Next->set(m_N - 1, m_Current->get(m_N-1));
 
-	m_Next->set(0, m_Next->get(1));
-	m_Next->set(m_N - 1, m_Next->get(m_N-2));
+	//m_Next->set(0, m_Next->get(1));
+	//m_Next->set(m_N - 1, m_Next->get(m_N-2));
 
 	swapCoupledGrid();
 	m_t+=m_dt;

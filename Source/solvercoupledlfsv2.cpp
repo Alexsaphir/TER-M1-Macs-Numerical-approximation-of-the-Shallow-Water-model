@@ -25,7 +25,8 @@ SolverCoupledLFSV2::SolverCoupledLFSV2(int N): Solver(N)
 void SolverCoupledLFSV2::initialCondition()
 {
 	m_t = 0.;
-	initialConditionOscillating();
+	initialConditionDam();
+	//initialConditionOscillating();
 	/*
 #pragma omp parallel
 	for(int i=0; i<m_N; ++i)
@@ -41,7 +42,7 @@ void SolverCoupledLFSV2::initialCondition()
 
 void SolverCoupledLFSV2::initialConditionOscillating()
 {
-	m_tmax = 19.87;
+	m_tmax = 27;
 	m_xmax = 1.;
 	m_xmin = 0.;
 	m_dx = (m_xmax - m_xmin) / (m_N - 1);
@@ -72,6 +73,29 @@ void SolverCoupledLFSV2::initialConditionRest()
 	}
 }
 
+void SolverCoupledLFSV2::initialConditionDam()
+{
+#pragma omp parallel
+	for(int i=0; i<m_N; ++i)
+	{
+		double x = m_xmin + m_dx*static_cast<double>(i);
+		if(x < -7.1)
+		{
+			m_Z->set(i,4.);
+			m_Current->setOnFirst(i, 5);
+		}
+		else if(x <=-7.)
+		{
+			m_Z->set(i,5.);
+			m_Current->setOnFirst(i, 4);
+		}
+		else
+		{
+			//m_Z->set(i,1./x);
+			m_Current->setOnFirst(i, .5);
+		}
+	}
+}
 
 void SolverCoupledLFSV2::solve()
 {
@@ -301,7 +325,7 @@ void SolverCoupledLFSV2::computeNext()
 	int offset = 2;
 	for(int i=offset; i<m_N-offset-1; ++i)
 	{
-		VectorR2 tmp = m_Current->get(i) - m_dt/m_dx * ( m_Flux->get(i) - m_Flux->get(i-1) - getS(i) - getS_ci(i));//Be carefull '-' before ( .... )
+		VectorR2 tmp = m_Current->get(i) - m_dt/m_dx * ( m_Flux->get(i+1) - m_Flux->get(i) - getS(i) - getS_ci(i));//Be carefull '-' before ( .... )
 		m_Next->set(i, tmp);//
 	}
 

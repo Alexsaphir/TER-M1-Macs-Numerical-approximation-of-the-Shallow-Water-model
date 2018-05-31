@@ -17,6 +17,7 @@ public:
 	void initialCondition();
 	void initialConditionOscillating();
 	void initialConditionRest();
+	void initialConditionDam();
 
 	void solve();
 

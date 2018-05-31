@@ -16,8 +16,9 @@ public:
 	void initialCondition();
 	void initialConditionOscillating();
 	void initialConditionRest();
-
+	void initialConditionDam();
 	void solve();
+
 
 private:
 	VectorR2 F(VectorR2 w) const;

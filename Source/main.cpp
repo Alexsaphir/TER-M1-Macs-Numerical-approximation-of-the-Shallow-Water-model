@@ -21,10 +21,10 @@ int main(int argc, char *argv[])
 	//SolverCoupledLF0 S0(3., .5, 401);
 	//S0.solve();
 
-	SolverCoupledLFSV SSV(401);
+	SolverCoupledLFSV SSV(10001);
 	SSV.solve();
 
-	SolverCoupledLFSV2 SSV2(401);
+	SolverCoupledLFSV2 SSV2(10001);
 	SSV2.solve();
 
 
