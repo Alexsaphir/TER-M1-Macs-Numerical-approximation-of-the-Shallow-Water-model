@@ -11,6 +11,7 @@ class SolverCoupledLF0: public Solver
 {
 public:
 	SolverCoupledLF0(double l, double r);
+	SolverCoupledLF0(double l, double r, int N);
 
 	void initialCondition();
 	void solve();

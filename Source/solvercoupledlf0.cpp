@@ -12,6 +12,18 @@ SolverCoupledLF0::SolverCoupledLF0(double l, double r)
 	m_Flux = new CoupledGridFlux(*m_Current);
 }
 
+SolverCoupledLF0::SolverCoupledLF0(double l, double r, int N): Solver(N)
+{
+	m_uL = l;
+	m_uR = r;
+
+	m_g = 10.;
+
+	m_Current = new CoupledGridPhysical(m_N);
+	m_Next = new CoupledGridPhysical(m_N);
+	m_Flux = new CoupledGridFlux(*m_Current);
+}
+
 VectorR2 SolverCoupledLF0::F(const VectorR2 &W) const
 {
 	return VectorR2(F1(W), F2(W));
@@ -46,7 +58,7 @@ void SolverCoupledLF0::initialCondition()
 {
 	m_t = 0.;
 
-	initFunc(dynamic_cast<GridPhysical*>(m_Current->first()), m_uR, m_uR);
+	initFunc(dynamic_cast<GridPhysical*>(m_Current->first()), m_uL, m_uR);
 
 #pragma omp parallel
 	for(int i=0; i<m_N; ++i)
