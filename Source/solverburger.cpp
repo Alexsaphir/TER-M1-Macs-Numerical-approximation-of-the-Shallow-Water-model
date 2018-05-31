@@ -10,6 +10,16 @@ SolverBurger::SolverBurger(double l, double r)
 	m_Flux = new GridFlux(*m_Current);
 }
 
+SolverBurger::SolverBurger(double l, double r, int N):Solver(N)
+{
+	m_uL = l;
+	m_uR = r;
+
+	m_Current = new GridPhysical(m_N);
+	m_Next = new GridPhysical(m_N);
+	m_Flux = new GridFlux(*m_Current);
+}
+
 void SolverBurger::initialCondition()
 {
 	m_t = 0.;

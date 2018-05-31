@@ -9,6 +9,7 @@ class SolverBurger: public Solver
 {
 public:
 	SolverBurger(double l, double r);
+	SolverBurger(double l, double r, int N);
 
 	void initialCondition();
 	void solve();
