@@ -14,6 +14,25 @@ Solver::Solver()
 
 	m_cache = new CacheSolver;
 	m_cacheSpeed = new CacheSolver;
+
+	std::cout << " dx step : " << m_dx << "N : " << m_N << std::endl;
+}
+
+Solver::Solver(int N)
+{
+	m_xmin = -10.;
+	m_xmax = 10.;
+	m_N = N;
+	m_dx = (m_xmax - m_xmin) / (m_N - 1);
+
+	m_tmax = 1.;
+	m_t = 0.;
+	m_dt = 0.;
+	m_dtmax = 0.01;
+
+	m_cache = new CacheSolver;
+	m_cacheSpeed = new CacheSolver;
+	std::cout << " dx step : " << m_dx << "N : " << m_N << std::endl;
 }
 
 Solver::~Solver()
@@ -97,6 +116,24 @@ void Solver::saveGridCSV(QString filename, Grid *G, Grid *offset) const
 		out << getX(i) << "," << G->get(i)+offset->get(i);
 		out << endl;
 	}
+	file.close();
+}
+
+void Solver::saveGridPython(QString filename, Grid *G) const
+{
+	QFile file(filename);
+	if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+		return;
+
+	QTextStream out(&file);
+
+	for(int i=0; i<G->size(); ++i)
+	{
+		out <<G->get(i);
+		if(i<G->size() - 1)
+			out << " ";
+	}
+	out << endl;
 	file.close();
 }
 
