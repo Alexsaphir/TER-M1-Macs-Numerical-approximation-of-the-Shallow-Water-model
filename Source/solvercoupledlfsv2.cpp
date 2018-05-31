@@ -325,7 +325,7 @@ void SolverCoupledLFSV2::computeNext()
 	int offset = 2;
 	for(int i=offset; i<m_N-offset-1; ++i)
 	{
-		VectorR2 tmp = m_Current->get(i) - m_dt/m_dx * ( m_Flux->get(i+1) - m_Flux->get(i) - getS(i) - getS_ci(i));//Be carefull '-' before ( .... )
+		VectorR2 tmp = m_Current->get(i) - m_dt/m_dx * ( m_Flux->get(i) - m_Flux->get(i-1) - getS(i) - getS_ci(i));//Be carefull '-' before ( .... )
 		m_Next->set(i, tmp);//
 	}
 
