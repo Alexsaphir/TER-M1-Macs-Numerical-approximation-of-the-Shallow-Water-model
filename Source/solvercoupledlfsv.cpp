@@ -23,7 +23,8 @@ SolverCoupledLFSV::SolverCoupledLFSV(int N): Solver(N)
 void SolverCoupledLFSV::initialCondition()
 {
 	//initialConditionOscillating();
-	initialConditionDam();
+	//initialConditionDam();
+	initAnthenden();
 	/*
 	m_t = 0.;
 	m_tmax = 2.;
@@ -101,6 +102,26 @@ void SolverCoupledLFSV::initialConditionDam()
 		{
 			//m_Z->set(i,1./x);
 			m_Current->setOnFirst(i, .5);
+		}
+	}
+}
+
+void SolverCoupledLFSV::initAnthenden()
+{
+	m_xmin = 0.;
+#pragma omp parallel
+	for(int i=0; i<m_N; ++i)
+	{
+		double x = m_xmin + m_dx*static_cast<double>(i);
+		if(x < 0)
+		{
+			m_Z->set(i,1 + exp(-x));
+			m_Current->setOnFirst(i, x*std::log(x*x+1));
+		}
+		else
+		{
+			m_Z->set(i,1.+ cos(x));
+			m_Current->setOnFirst(i, 1+exp(-x*x/2.));
 		}
 	}
 }

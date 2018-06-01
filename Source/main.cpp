@@ -21,11 +21,11 @@ int main(int argc, char *argv[])
 	//SolverCoupledLF0 S0(3., .5, 401);
 	//S0.solve();
 
-	SolverCoupledLFSV SSV(10001);
+	SolverCoupledLFSV SSV(2001);
 	SSV.solve();
 
-	SolverCoupledLFSV2 SSV2(10001);
-	SSV2.solve();
+	//SolverCoupledLFSV2 SSV2(2001);
+	//SSV2.solve();
 
 
 	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
