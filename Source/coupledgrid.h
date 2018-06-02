@@ -4,6 +4,10 @@
 #include "grid.h"
 #include "vectorr2.h"
 
+/**
+ * @brief The CoupledGrid class store two Grid object
+ */
+
 class CoupledGrid
 {
 public:

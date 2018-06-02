@@ -5,6 +5,10 @@
 #include "coupledgridphysical.h"
 #include "gridflux.h"
 
+/**
+ * @brief The CoupledGridFlux class store two GridFlux
+ */
+
 class CoupledGridFlux: public CoupledGrid
 {
 public:

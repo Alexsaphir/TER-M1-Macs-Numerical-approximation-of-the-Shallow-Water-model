@@ -4,6 +4,10 @@
 #include "coupledgrid.h"
 #include "gridphysical.h"
 
+/**
+ * @brief The CoupledGridPhysical class store two GridPhysical
+ */
+
 class CoupledGridPhysical: public CoupledGrid
 {
 public:

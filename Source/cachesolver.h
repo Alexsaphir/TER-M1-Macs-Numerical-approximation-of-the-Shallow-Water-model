@@ -8,7 +8,9 @@
 
 #include <iostream>
 
-
+/**
+ * @brief The CacheSolver class store a collection of data to save them on disk later
+ */
 
 class CacheSolver
 {
