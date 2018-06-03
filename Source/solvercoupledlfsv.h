@@ -206,16 +206,16 @@ protected:
 	 */
 	CoupledGridPhysical *m_Next;
 	/**
-	 * @brief m_Flux
+	 * @brief m_Flux GridFlux associate to the Current
 	 */
 	CoupledGridFlux *m_Flux;
 
 	/**
-	 * @brief m_Z
+	 * @brief m_Z Grid to store the topography
 	 */
 	GridPhysical *m_Z;
 	/**
-	 * @brief m_U
+	 * @brief m_U Temporary greed for the speed
 	 */
 	GridPhysical *m_U;
 };

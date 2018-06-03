@@ -14,15 +14,15 @@ int main(int argc, char *argv[])
 	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
 
 
-	//SolverBurger SB(3,1, 401);
+	SolverBurger SB(3,1, 1001);
 
-	//SB.solve();
+	SB.solve();
 
 	//SolverCoupledLF0 S0(3., .5, 401);
 	//S0.solve();
 
-	SolverCoupledLFSV SSV(2001);
-	SSV.solve();
+	//SolverCoupledLFSV SSV(2001);
+	//SSV.solve();
 
 	//SolverCoupledLFSV2 SSV2(2001);
 	//SSV2.solve();

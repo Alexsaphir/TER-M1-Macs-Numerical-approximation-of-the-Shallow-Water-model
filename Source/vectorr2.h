@@ -10,32 +10,32 @@ class VectorR2
 {
 public:
 	/**
-	 * @brief VectorR2
+	 * @brief VectorR2 Construct a null element
 	 */
 	VectorR2();
 	/**
-	 * @brief VectorR2
-	 * @param a
-	 * @param b
+	 * @brief VectorR2 Construct an element with values given
+	 * @param a x-element
+	 * @param b y-element
 	 */
 	VectorR2(double a, double b);
 	/**
-	 * @brief VectorR2
-	 * @param A
+	 * @brief VectorR2 Copy Constructor
+	 * @param A Object to copy
 	 */
 	VectorR2(const VectorR2 &A);
 
 	/**
-	 * @brief abs
+	 * @brief abs Return the euclideann norm of the vector
 	 */
 	void abs();
 
 	/**
-	 * @brief x
+	 * @brief x x componant
 	 */
 	double x;
 	/**
-	 * @brief y
+	 * @brief y y componant
 	 */
 	double y;
 };

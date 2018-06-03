@@ -12,6 +12,10 @@
 class CoupledGridFlux: public CoupledGrid
 {
 public:
+	/**
+	 * @brief CoupledGridFlux Create a coupled Grid for the flux
+	 * @param CGP coupled grid physical
+	 */
 	CoupledGridFlux(const CoupledGridPhysical &CGP);
 	~CoupledGridFlux();
 };

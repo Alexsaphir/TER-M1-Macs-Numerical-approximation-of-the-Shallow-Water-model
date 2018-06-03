@@ -11,6 +11,10 @@
 class CoupledGridPhysical: public CoupledGrid
 {
 public:
+	/**
+	 * @brief CoupledGridPhysical Create a coupled grid of N elements
+	 * @param N Number of elements
+	 */
 	CoupledGridPhysical(int N);
 	~CoupledGridPhysical();
 };

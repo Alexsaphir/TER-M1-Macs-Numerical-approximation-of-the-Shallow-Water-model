@@ -23,8 +23,17 @@ SolverBurger::SolverBurger(double l, double r, int N):Solver(N)
 void SolverBurger::initialCondition()
 {
 	m_t = 0.;
-
-	initFunc(m_Current, m_uL, m_uR);
+	m_tmax = 5.;
+	m_xmax = 2.* M_PI;
+	m_xmin = 0;
+	m_dx = (m_xmax - m_xmin) / (m_N - 1);
+	//initFunc(m_Current, m_uL, m_uR);
+#pragma omp parallel
+	for(int i=0; i<m_N; ++i)
+	{
+		double x = m_xmin + m_dx*static_cast<double>(i);
+		m_Current->set(i, std::sin(x));
+	}
 }
 
 void SolverBurger::solve()
