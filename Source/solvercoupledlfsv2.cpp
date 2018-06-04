@@ -79,21 +79,31 @@ void SolverCoupledLFSV2::initialConditionDam()
 	for(int i=0; i<m_N; ++i)
 	{
 		double x = m_xmin + m_dx*static_cast<double>(i);
-		if(x < -7.1)
-		{
-			m_Z->set(i,4.);
-			m_Current->setOnFirst(i, 5);
+		if(x<=0){
+			m_Z->set(i,3);
+			m_Current->setOnFirst(i, 3);
 		}
-		else if(x <=-7.)
-		{
-			m_Z->set(i,5.);
-			m_Current->setOnFirst(i, 4);
+		else{
+			m_Z->set(i,1.);
+			m_Current->setOnFirst(i, 1);
 		}
-		else
-		{
-			//m_Z->set(i,1./x);
-			m_Current->setOnFirst(i, .5);
-		}
+
+
+//		if(x < -7.1)
+//		{
+//			m_Z->set(i,4.);
+//			m_Current->setOnFirst(i, 5);
+//		}
+//		else if(x <=-7.)
+//		{
+//			m_Z->set(i,5.);
+//			m_Current->setOnFirst(i, 4);
+//		}
+//		else
+//		{
+//			//m_Z->set(i,1./x);
+//			m_Current->setOnFirst(i, .5);
+//		}
 	}
 }
 

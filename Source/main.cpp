@@ -16,15 +16,15 @@ int main(int argc, char *argv[])
 
 	SolverBurger SB(3,1, 1001);
 
-	SB.solve();
+	//SB.solve();
 
 	//SolverCoupledLF0 S0(3., .5, 401);
 	//S0.solve();
 
-	//SolverCoupledLFSV SSV(2001);
-	//SSV.solve();
+	SolverCoupledLFSV SSV(4001);
+	SSV.solve();
 
-	//SolverCoupledLFSV2 SSV2(2001);
+	//SolverCoupledLFSV2 SSV2(401);
 	//SSV2.solve();
 
 
